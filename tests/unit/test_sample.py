@@ -2,8 +2,8 @@
 Sample test file to demonstrate testing structure
 """
 
-import pytest
 import numpy as np
+import pytest
 
 
 @pytest.mark.unit
@@ -13,11 +13,11 @@ def test_sample_neural_data_fixture(sample_neural_data):
 
     # Check shapes
     assert X.shape[0] == 100  # n_samples
-    assert X.shape[1] == 50   # n_neurons
-    assert X.shape[2] == 20   # n_timebins
+    assert X.shape[1] == 50  # n_neurons
+    assert X.shape[2] == 20  # n_timebins
 
     assert y.shape[0] == 100  # n_samples
-    assert y.shape[1] == 2    # n_dimensions
+    assert y.shape[1] == 2  # n_dimensions
 
     # Check data types
     assert X.dtype == float
@@ -60,16 +60,20 @@ def test_basic_math():
 
 # Example of a parametrized test
 @pytest.mark.unit
-@pytest.mark.parametrize("n,expected", [
-    (0, 0),
-    (1, 1),
-    (2, 2),
-    (3, 6),
-    (4, 24),
-])
+@pytest.mark.parametrize(
+    "n,expected",
+    [
+        (0, 1),  # 0! = 1
+        (1, 1),
+        (2, 2),
+        (3, 6),
+        (4, 24),
+    ],
+)
 def test_factorial(n, expected):
     """Test factorial calculation (placeholder)."""
     import math
+
     assert math.factorial(n) == expected
 
 
@@ -88,5 +92,6 @@ def test_slow_operation():
     """Example of a test marked as slow."""
     # This test would be skipped with: pytest -m "not slow"
     import time
+
     time.sleep(0.1)  # Simulate slow operation
     assert True
