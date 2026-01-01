@@ -140,8 +140,8 @@ The project uses multiple publicly available neural datasets:
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/neural_decoding_sys.git
-cd neural_decoding_sys
+git clone https://github.com/Abhaythakur01/neurodecode.git
+cd neurodecode
 
 # Create virtual environment
 python -m venv venv
@@ -291,9 +291,9 @@ If you use this code in your research, please cite:
 ```bibtex
 @software{neurodecode2026,
   title={NeuroDecode: Real-Time Adaptive Brain-Computer Interface},
-  author={Your Name},
+  author={Abhay Thakur},
   year={2026},
-  url={https://github.com/yourusername/neural_decoding_sys}
+  url={https://github.com/Abhaythakur01/neurodecode}
 }
 ```
 
@@ -310,10 +310,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact
 
-- **Author**: Your Name
-- **Email**: your.email@example.com
-- **Project Link**: https://github.com/yourusername/neural_decoding_sys
-- **Blog**: https://yourblog.com/neurodecode
+- **Author**: Abhay Thakur
+- **GitHub**: [@Abhaythakur01](https://github.com/Abhaythakur01)
+- **Project Link**: https://github.com/Abhaythakur01/neurodecode
 
 ---
 

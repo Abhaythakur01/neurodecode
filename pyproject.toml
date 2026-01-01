@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Real-Time Adaptive Brain-Computer Interface for Motor Control"
 readme = "README.md"
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "Abhay Thakur", email = "abhay@neurodecode.dev"}
 ]
 license = {text = "MIT"}
 classifiers = [
@@ -25,10 +25,10 @@ keywords = ["bci", "neural-decoding", "machine-learning", "neuroscience"]
 requires-python = ">=3.8"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/neural_decoding_sys"
-Documentation = "https://neural-decode.readthedocs.io"
-Repository = "https://github.com/yourusername/neural_decoding_sys"
-"Bug Tracker" = "https://github.com/yourusername/neural_decoding_sys/issues"
+Homepage = "https://github.com/Abhaythakur01/neurodecode"
+Documentation = "https://github.com/Abhaythakur01/neurodecode/wiki"
+Repository = "https://github.com/Abhaythakur01/neurodecode"
+"Bug Tracker" = "https://github.com/Abhaythakur01/neurodecode/issues"
 
 [tool.black]
 line-length = 100
