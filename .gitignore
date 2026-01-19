@@ -42,6 +42,7 @@ venv.bak/
 .vscode/
 *.code-workspace
 .history/
+.claude/
 
 # Jupyter Notebook
 .ipynb_checkpoints

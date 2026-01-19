@@ -4,69 +4,67 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-NeuroDecode is an expert-level Brain-Computer Interface (BCI) system implementing 13+ neural decoding algorithms with a novel adaptive meta-learning approach. The project aims to demonstrate a complete pipeline from raw neural data to deployed clinical application with real-time performance (<50ms latency).
+NeuroDecode is a Brain-Computer Interface (BCI) system implementing 17+ neural decoding algorithms with an adaptive meta-learning approach. Core innovation: a meta-learner that automatically selects and combines decoders based on brain state with online adaptation and uncertainty quantification.
 
-**Core Innovation**: An adaptive meta-learner that automatically selects and combines multiple decoders based on brain state, with online adaptation and uncertainty quantification.
+**Critical constraint**: All processing must complete in <50ms for closed-loop control.
+
+### Implemented Decoders
+
+| Category | Decoders |
+|----------|----------|
+| Classic | KalmanFilterDecoder, SteadyStateKalmanFilter, WienerFilterDecoder, CausalWienerFilter, NonCausalWienerFilter, LDADecoder, ShrinkageLDA, GaussianHMM, DiscreteHMM |
+| ML | SVMDecoder, SVMClassifier, RandomForestDecoder, RandomForestClassifierDecoder, XGBoostDecoder*, XGBoostClassifier*, GaussianProcessDecoder, SparseGPDecoder, GPClassifier |
+| Deep Learning | LSTMDecoder*, BidirectionalLSTMDecoder* |
+| Meta-Learner | AdaptiveMetaLearner, DecoderSelector, DecoderCombiner, OnlineAdapter |
+
+*Optional dependencies: XGBoost decoders require `xgboost`, LSTM decoders require `torch`
 
 ## Development Environment
 
-### Setup (Windows)
 ```bash
-# Virtual environment is required
+# Setup (Windows)
 python -m venv venv
 venv\Scripts\activate
-
-# Install in editable mode
 pip install -e .
 
-# Run tests to verify
+# Verify installation
 python -m pytest tests/unit/test_sample.py -v
 ```
 
-**Note**: Python 3.13+ is supported. Some packages (especially neuroscience-specific ones) may need binary wheels. If compilation fails, install pre-built packages first: `pip install numpy scipy --only-binary=:all:`
+**Note**: Python 3.8+ required. If compilation fails for scientific packages: `pip install numpy scipy --only-binary=:all:`
 
 ## Key Commands
 
 ### Testing
 ```bash
-# Run all unit tests (fast)
+# Fast unit tests (excludes slow tests)
 python -m pytest tests/unit -v -m "not slow"
 
-# Run with coverage
-python -m pytest --cov=src --cov-report=html
-
-# Run specific test file
+# Specific test file
 python -m pytest tests/unit/decoders/test_kalman_filter.py -v
 
-# Run benchmarks only
-python -m pytest tests/benchmarks/ --benchmark-only
+# With coverage
+python -m pytest --cov=src --cov-report=html
 
-# Run integration tests (requires database)
+# Integration tests (requires postgres/redis)
 python -m pytest tests/integration -v -m integration
+
+# Benchmarks
+python -m pytest tests/benchmarks/ --benchmark-only
 ```
 
 ### Code Quality
 ```bash
-# Format code (line length: 100)
-python -m black src tests
-python -m isort src tests
-
-# Lint
+python -m black src tests                    # Format (line length: 100)
+python -m isort src tests                    # Sort imports
 python -m flake8 src tests --max-line-length=100 --extend-ignore=E203,W503
-
-# Type check (relaxed for ML code)
-python -m mypy src --ignore-missing-imports
+python -m mypy src --ignore-missing-imports  # Type check (warnings OK)
 ```
 
-### Docker (Full Stack)
+### Docker
 ```bash
-# Start all services (backend, frontend, postgres, redis)
-docker-compose up -d
-
-# View logs
+docker-compose up -d      # Start all services (backend, frontend, postgres, redis)
 docker-compose logs -f backend
-
-# Stop all services
 docker-compose down
 ```
 
@@ -74,68 +72,60 @@ docker-compose down
 
 ### Three-Layer Design
 
-1. **Data Processing Layer** (`src/preprocessing/`, `src/features/`)
-   - Input: Multi-channel neural signals (spike trains, LFPs)
-   - Preprocessing: Filtering, artifact removal, spike detection
-   - Feature extraction: Firing rates (20ms bins default), spectral features
-   - Output: Normalized feature vectors
+1. **Data Processing** (`src/preprocessing/`, `src/features/`): Neural signal filtering, artifact removal, feature extraction (20ms bins default)
 
-2. **Decoding Layer** (`src/decoders/`)
-   - **Classic** (`classic/`): Kalman, Wiener, LDA, HMM
-   - **ML** (`ml/`): SVM, Random Forest, XGBoost, Gaussian Process
-   - **Deep Learning** (`deep_learning/`): LSTM, Transformer, TCN, VAE
-   - **Meta-Learner** (`meta_learner/`): Selects/combines decoders, adapts online
+2. **Decoding** (`src/decoders/`):
+   - `classic/`: Kalman, Wiener, LDA, HMM
+   - `ml/`: SVM, Random Forest, XGBoost, Gaussian Process
+   - `deep_learning/`: LSTM, Transformer, TCN, VAE
+   - `meta_learner/`: Adaptive decoder selection and combination
 
-3. **Application Layer** (`src/backend/`, `frontend/`)
-   - FastAPI backend with WebSocket for real-time streaming
-   - React frontend with live visualization
-   - PostgreSQL for session data, Redis for caching
+3. **Application** (`src/backend/`, `frontend/`): FastAPI + WebSocket backend, React frontend, PostgreSQL + Redis
 
-### Data Flow (Real-Time)
+### Data Flow
 ```
-Neural Data → Preprocessing (10ms) → Feature Extraction (5ms) →
-Parallel Decoder Inference (20ms) → Meta-Learner (10ms) →
-WebSocket → Frontend (5ms)
-Total: <50ms end-to-end
+Neural Data → Preprocessing (10ms) → Features (5ms) → Decoders (20ms) → Meta-Learner (10ms) → WebSocket → Frontend (5ms)
 ```
 
-### Critical Design Constraints
+### Key Constraints
+- **Neural data shape**: (n_samples, n_neurons, n_timebins)
+- **Primary metric**: R² correlation with intended movement
+- **Test coverage target**: 80%+
 
-- **Latency**: All processing must complete in <50ms for closed-loop control
-- **Test Coverage**: Target 80%+ coverage (currently configured in pytest.ini)
-- **Neural Data Format**: Expects shape (n_samples, n_neurons, n_timebins)
-- **Evaluation Metric**: Primary metric is R² correlation with intended movement
+## Decoder Interface
 
-## Decoder Implementation Pattern
-
-All decoders must follow this interface:
+All decoders inherit from `BaseDecoder` or `OnlineDecoder` in `src/decoders/base.py`:
 
 ```python
 class BaseDecoder:
-    def fit(self, X, y):
-        """Train on neural data X and kinematic targets y"""
+    def fit(self, X, y):       # Train on neural data X, kinematics y
+    def predict(self, X):      # Decode movement
+    def evaluate(self, X, y):  # Return R² score
+    def save(self, path):      # Serialize model
+    def load(self, path):      # Deserialize model
 
-    def predict(self, X):
-        """Decode movement from neural data"""
-
-    def evaluate(self, X, y):
-        """Return R² score"""
-
-    def update(self, X, y):
-        """Online learning (optional)"""
+class OnlineDecoder(BaseDecoder):
+    def update(self, X, y):    # Online learning update
+    def predict_single(self, x):  # Single-sample prediction for real-time
 ```
 
-**Key Convention**: Decoders are instantiated with hyperparameters, trained with `fit()`, and used with `predict()`. The meta-learner calls `predict()` on all base decoders in parallel.
+The meta-learner calls `predict()` on all base decoders in parallel.
 
-## Testing Philosophy
+### Key Data Structures (meta_learner/base.py)
 
-- **Unit tests** (`tests/unit/`): Test individual components in isolation
-- **Integration tests** (`tests/integration/`): Test end-to-end pipelines
-- **Benchmarks** (`tests/benchmarks/`): Measure latency and throughput
-- **Fixtures** (`tests/conftest.py`): Shared test data generators
-  - `sample_neural_data`: (100, 50, 20) shaped array
-  - `sample_firing_rates`: (100, 50) firing rates
-  - `decoder_config`: Standard hyperparameters
+- `DecoderWrapper`: Wraps a decoder with state, weight, and metrics
+- `DecoderMetrics`: Tracks R², MSE, latency, uncertainty over time
+- `PredictionResult`: Single decoder output with uncertainty
+- `EnsembleResult`: Combined prediction with decoder weights and metadata
+- `DecoderState`: ACTIVE, STANDBY, DEGRADED, DISABLED
+
+## Test Fixtures (tests/conftest.py)
+
+- `sample_neural_data`: Returns (X, y) tuple - X:(100, 50, 20), y:(100, 2)
+- `sample_firing_rates`: (100, 50) array
+- `sample_spike_train`: Sorted spike times in 1s window
+- `decoder_config`: Standard hyperparameters dict
+- `temp_model_path`: Temporary directory for model saves
 
 ### Test Markers
 ```python
@@ -143,121 +133,107 @@ class BaseDecoder:
 @pytest.mark.slow          # Tests >1 second
 @pytest.mark.integration   # Requires external services
 @pytest.mark.benchmark     # Performance tests
+@pytest.mark.decoder       # Decoder algorithm tests
+@pytest.mark.preprocessing # Preprocessing module tests
+@pytest.mark.api           # API endpoint tests
 ```
 
-## Datasets
+## Adding a New Decoder
 
-The project uses publicly available neural datasets:
-- **Neural Latents Benchmark (NLB)**: Primary dataset for reaching tasks
-- **CRCNS**: Motor cortex recordings during arm movements
-- **DANDI Archive**: Diverse neurophysiology data
-- **BCI Competition**: Historical benchmark datasets
+1. Create: `src/decoders/{classic,ml,deep_learning}/new_decoder.py`
+2. Implement the decoder interface (fit, predict, evaluate, update)
+3. Add tests: `tests/unit/decoders/test_new_decoder.py`
+4. Register with meta-learner if applicable
+5. Add benchmarks: `tests/benchmarks/`
 
-**Data Location**: Store raw data in `data/raw/`, processed in `data/processed/`
-**Not in Git**: All data files are gitignored (large binary files)
+## Neural Data Conventions
 
-## Performance Optimization
+- **Bin size**: 20ms (1000 samples/sec → 50 bins/second)
+- **Normalization**: Z-score per neuron across training set
+- **Train/test split**: 80/20, preserve temporal order (no shuffle)
+- **Data location**: `data/raw/` (raw), `data/processed/` (processed) - gitignored
 
-Critical paths for <50ms latency:
-1. Use **Cython** for preprocessing bottlenecks (future)
-2. **Batch inference** where possible in deep learning models
-3. **Model quantization** for PyTorch models
-4. **Redis caching** for frequently accessed features
-5. **Parallel execution** of base decoders in meta-learner
+## Meta-Learner Architecture (Fully Implemented)
+
+The adaptive meta-learner is in `src/decoders/meta_learner/` with four components:
+
+### Components
+
+1. **Selector** (`selector.py`): Chooses decoders using configurable strategies:
+   - `BEST`: Single best performer
+   - `TOP_K`: Top K decoders by R² score
+   - `THRESHOLD`: All above performance threshold
+   - `UNCERTAINTY_AWARE`: Prefer low-uncertainty decoders
+   - `ADAPTIVE`: Dynamic selection based on recent trends
+
+2. **Combiner** (`combiner.py`): Combines predictions using strategies:
+   - `MEAN`: Simple average
+   - `WEIGHTED_MEAN`: Performance-weighted average
+   - `MEDIAN`: Robust to outliers
+   - `UNCERTAINTY_WEIGHTED`: Weight by inverse uncertainty (default)
+   - `STACKING`: Learned meta-model weights
+
+3. **Online Adapter** (`adapter.py`): Updates weights using recent prediction errors, detects performance degradation, handles electrode dropout
+
+4. **AdaptiveMetaLearner** (`meta_learner.py`): Orchestrates all components with parallel decoder execution via ThreadPoolExecutor
+
+### Usage Example
+```python
+from src.decoders import AdaptiveMetaLearner, KalmanFilterDecoder, SVMDecoder
+
+meta = AdaptiveMetaLearner(
+    selection_strategy=SelectionStrategy.ADAPTIVE,
+    combination_strategy=CombinationStrategy.UNCERTAINTY_WEIGHTED,
+    top_k=3,
+    parallel=True,
+)
+meta.add_decoder(KalmanFilterDecoder())
+meta.add_decoder(SVMDecoder())
+meta.fit(X_train, y_train)
+result = meta.predict_with_info(X_test)  # Returns EnsembleResult with prediction + uncertainty
+```
 
 ## Code Style
 
-- **Line length**: 100 characters (black, flake8)
-- **Import sorting**: isort with black profile
-- **Type hints**: Encouraged but not strictly enforced (mypy warnings acceptable)
-- **Docstrings**: Not required for private methods, required for public API
-- **Disabled pylint checks**: C0103 (naming), R0903 (few public methods), R0913 (many arguments) - common in ML code
+- Line length: 100 (black, flake8)
+- Import sorting: isort with black profile
+- Type hints: Encouraged but mypy warnings acceptable
+- Docstrings: Required for public API only
+- Disabled pylint: C0103 (naming), R0903 (few methods), R0913 (many args)
 
-## Common Development Patterns
+## Known Issues
 
-### Adding a New Decoder
+- Pre-commit hooks fail on Windows - use `git commit --no-verify` or run formatters manually
+- PyTorch is CPU-only (GPU requires CUDA toolkit installation)
+- Some neuroscience packages (MNE, Neo, Elephant) may need manual setup
+- LSTM tests are skipped if PyTorch is not installed
+- XGBoost decoders gracefully degrade if xgboost package not installed
 
-1. Create file in appropriate subdirectory: `src/decoders/{classic,ml,deep_learning}/new_decoder.py`
-2. Inherit from base class or implement standard interface
-3. Add unit tests: `tests/unit/decoders/test_new_decoder.py`
-4. Add to meta-learner registry (if applicable)
-5. Benchmark against baseline: Add to `tests/benchmarks/`
+## Dependencies
 
-### Neural Data Processing
+- `requirements.txt`: All packages (ML, scientific, web framework)
+- `requirements-dev.txt`: Development tools (includes requirements.txt)
 
-- **Default bin size**: 20ms (1000 samples/sec → 50 bins/second)
-- **Feature extraction**: Compute firing rates by counting spikes per bin
-- **Normalization**: Z-score normalization per neuron across training set
-- **Train/test split**: 80/20, preserve temporal order (no shuffle)
-
-### Real-Time Streaming
-
-Backend uses WebSocket for low-latency data streaming:
-```python
-# In src/backend/
-@app.websocket("/ws/decode")
-async def websocket_decode(websocket: WebSocket):
-    # Receive neural data, decode, stream predictions
-```
-
-Frontend connects via WebSocket to display live trajectories.
-
-## Documentation
-
-- **Architecture**: `docs/architecture/DESIGN.md` - detailed system design
-- **Literature**: `docs/papers/LITERATURE.md` - 25+ research papers with reading schedule
-- **API Docs**: Auto-generated from FastAPI (not yet implemented)
-- **Clinical**: `docs/clinical/` - regulatory and clinical protocol docs (future)
-
-## Development Roadmap Context
-
-**Current Phase**: Month 1 - Foundation
-- Project structure: ✅ Complete
-- Literature review: In progress
-- Dataset acquisition: Pending
-- Baseline Kalman Filter: Next milestone
-
-**Critical Path**:
-1. Implement preprocessing pipeline
-2. Implement Kalman Filter (baseline decoder)
-3. Add evaluation metrics (R², latency)
-4. Implement meta-learner framework
-5. Add deep learning decoders
-6. Build real-time web interface
-
-## Known Issues & Limitations
-
-- Pre-commit hooks fail on Windows (requires Visual C++ Build Tools for ruamel.yaml compilation)
-  - Workaround: Use `git commit --no-verify` or run formatters manually
-- Some neuroscience packages (MNE, Neo, Elephant) not yet installed/tested
-- PyTorch CPU-only version installed (GPU support requires CUDA toolkit)
-- Frontend directory exists but no React code yet implemented
-
-## When Adding Dependencies
-
-New ML/scientific packages should be added to `requirements.txt`. Development tools go in `requirements-dev.txt`. After adding:
+### Optional Dependencies
 ```bash
-pip install -r requirements.txt
-pip install -e .
+pip install torch      # For LSTM/deep learning decoders
+pip install xgboost    # For XGBoost decoders
 ```
 
-Check compatibility with Python 3.8+ (declared minimum version).
+## Test Coverage
 
-## Meta-Learner Architecture (Novel Component)
+Test files in `tests/unit/decoders/`:
+- `test_kalman_filter.py` - Kalman filter decoders
+- `test_wiener_filter.py` - Wiener filter decoders
+- `test_lda.py` - LDA decoders
+- `test_hmm.py` - HMM decoders (GaussianHMM, DiscreteHMM)
+- `test_svm.py` - SVM regression/classification
+- `test_random_forest.py` - Random Forest decoders
+- `test_gaussian_process.py` - GP decoders with uncertainty
+- `test_lstm.py` - LSTM decoders (requires PyTorch)
+- `test_meta_learner.py` - Full meta-learner system tests
 
-The adaptive meta-learner is the core innovation:
-
-**Three Components**:
-1. **Selector**: Chooses best decoder based on uncertainty and recent performance
-2. **Combiner**: Confidence-weighted ensemble of top-K decoders
-3. **Online Adapter**: Updates weights using recent prediction errors
-
-**Key Feature**: Handles electrode dropout by detecting performance degradation and reweighting decoders.
-
-Implementation location: `src/decoders/meta_learner/`
-
-## Contact & Resources
-
-- Repository: https://github.com/Abhaythakur01/neurodecode
-- Issues: https://github.com/Abhaythakur01/neurodecode/issues
-- Author: Abhay Thakur (@Abhaythakur01)
+Run specific decoder tests:
+```bash
+python -m pytest tests/unit/decoders/test_meta_learner.py -v
+```
