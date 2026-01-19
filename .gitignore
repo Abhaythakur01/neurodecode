@@ -209,3 +209,17 @@ experiments/
 
 # Specific to this project
 Neural_decoding_sys_project_requirement.pdf.backup
+
+# Windows reserved device names (prevent accidental creation)
+nul
+NUL
+con
+CON
+prn
+PRN
+aux
+AUX
+com[1-9]
+COM[1-9]
+lpt[1-9]
+LPT[1-9]
