@@ -65,9 +65,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.python-version }}-pip-
 
-      - name: Install OpenMP (macOS)
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev
+
+      - name: Install system dependencies (macOS)
         if: runner.os == 'macOS'
-        run: brew install libomp
+        run: brew install libomp postgresql
 
       - name: Install dependencies
         run: |
