@@ -129,16 +129,10 @@ passlib[bcrypt]>=1.7.4
 ipdb>=0.13.13
 python-json-logger>=2.0.7
 
-# API Documentation
-fastapi-swagger-ui>=0.0.1
-
 # Rate Limiting & Caching
 slowapi>=0.1.9
 redis>=5.0.0
 hiredis>=2.2.0
-
-# CORS & Middleware
-python-cors>=1.0.0
 
 # Data Science Workflow
 dvc>=3.30.0
