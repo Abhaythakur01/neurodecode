@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for NeuroDecode backend
 
 # Stage 1: Base image with system dependencies
-FROM python:3.10-slim as base
+FROM python:3.10-slim AS base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Stage 2: Dependencies
-FROM base as dependencies
+FROM base AS dependencies
 
 WORKDIR /app
 
@@ -37,7 +37,7 @@ RUN pip install --upgrade pip setuptools wheel && \
     pip install -r requirements.txt
 
 # Stage 3: Development image
-FROM dependencies as development
+FROM dependencies AS development
 
 # Copy application code
 COPY . .
@@ -52,7 +52,7 @@ EXPOSE 8000
 CMD ["uvicorn", "src.backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
 # Stage 4: Production image
-FROM dependencies as production
+FROM dependencies AS production
 
 # Create non-root user
 RUN useradd -m -u 1000 neurodecode && \
@@ -65,11 +65,11 @@ USER neurodecode
 WORKDIR /app
 
 # Copy only necessary files
-COPY --chown=neurodecode:neurodecode setup.py pyproject.toml ./
+COPY --chown=neurodecode:neurodecode setup.py pyproject.toml requirements.txt README.md ./
 COPY --chown=neurodecode:neurodecode src/ ./src/
 
-# Install package
-RUN pip install --user .
+# Install package (dependencies already installed in base image)
+RUN pip install --user --no-deps .
 
 # Set PATH for user-installed packages
 ENV PATH="/home/neurodecode/.local/bin:${PATH}"
