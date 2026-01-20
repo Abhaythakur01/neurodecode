@@ -39,10 +39,8 @@ ipython>=8.10.0
 watchdog>=3.0.0
 
 # Profiling & Performance
-py-spy>=0.3.14
 memory-profiler>=0.61.0
-line-profiler>=4.1.1
-scalene>=1.5.0
+# py-spy, line-profiler, scalene - install separately if needed (platform-specific build issues)
 
 # Type Stubs
 types-requests>=2.31.0

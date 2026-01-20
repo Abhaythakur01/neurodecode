@@ -37,8 +37,8 @@ websockets>=12.0
 
 # Database
 sqlalchemy>=2.0.0
-psycopg2-binary>=2.9.0
 alembic>=1.12.0
+# psycopg2-binary - install separately if PostgreSQL is needed
 
 # Data Validation & Serialization
 pydantic-settings>=2.0.0
