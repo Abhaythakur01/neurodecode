@@ -175,7 +175,7 @@ class LatencyTracker:
             print(f"  P99:    {stats.p99:.2f} ms")
 
         total = self.get_total_latency()
-        print(f"\nTotal Pipeline:")
+        print("\nTotal Pipeline:")
         print(f"  Mean:   {total.mean:.2f} ms")
         print(f"  P95:    {total.p95:.2f} ms")
         print(f"  P99:    {total.p99:.2f} ms")

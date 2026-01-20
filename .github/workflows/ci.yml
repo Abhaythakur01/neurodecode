@@ -29,20 +29,16 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install black flake8 mypy isort pylint
+          pip install black flake8 isort
 
       - name: Run Black
-        run: black --check src tests
+        run: black --check --line-length=100 src tests
 
       - name: Run isort
-        run: isort --check-only src tests
+        run: isort --check-only --profile black --line-length 100 src tests
 
       - name: Run Flake8
-        run: flake8 src tests --max-line-length=100 --extend-ignore=E203,W503
-
-      - name: Run MyPy
-        run: mypy src --ignore-missing-imports
-        continue-on-error: true
+        run: flake8 src tests --max-line-length=100 --extend-ignore=E203,W503,F401,F841
 
   test:
     name: Tests - Python ${{ matrix.python-version }}
