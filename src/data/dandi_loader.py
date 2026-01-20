@@ -276,9 +276,11 @@ class DANDIDataLoader:
                                     data["behavior"] = {
                                         "name": series_name,
                                         "data": np.array(series.data),
-                                        "timestamps": np.array(series.timestamps)
-                                        if series.timestamps is not None
-                                        else None,
+                                        "timestamps": (
+                                            np.array(series.timestamps)
+                                            if series.timestamps is not None
+                                            else None
+                                        ),
                                     }
                                     break
 
@@ -290,9 +292,11 @@ class DANDIDataLoader:
                         data["behavior"] = {
                             "name": acq_name,
                             "data": np.array(acq.data),
-                            "timestamps": np.array(acq.timestamps)
-                            if hasattr(acq, "timestamps") and acq.timestamps is not None
-                            else None,
+                            "timestamps": (
+                                np.array(acq.timestamps)
+                                if hasattr(acq, "timestamps") and acq.timestamps is not None
+                                else None
+                            ),
                         }
                         break
 
