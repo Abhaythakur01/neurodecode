@@ -224,7 +224,7 @@ class LDADecoder(BaseDecoder):
             cov += X_c_centered.T @ X_c_centered
 
         # Normalize by total samples - n_classes (unbiased estimate)
-        cov /= (n_samples - self.n_classes_)
+        cov /= n_samples - self.n_classes_
 
         return cov
 
@@ -265,9 +265,8 @@ class LDADecoder(BaseDecoder):
         Sw_inv = np.linalg.inv(self.covariance_)
 
         self.coef_ = self.means_ @ Sw_inv  # (n_classes, n_features)
-        self.intercept_ = (
-            -0.5 * np.sum(self.means_ * (self.means_ @ Sw_inv), axis=1)
-            + np.log(self.priors_)
+        self.intercept_ = -0.5 * np.sum(self.means_ * (self.means_ @ Sw_inv), axis=1) + np.log(
+            self.priors_
         )
 
     def _decision_function(self, X: np.ndarray) -> np.ndarray:
@@ -277,12 +276,14 @@ class LDADecoder(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get decoder parameters."""
         params = super().get_params()
-        params.update({
-            "n_components": self.n_components,
-            "regularization": self.regularization,
-            "n_classes": self.n_classes_,
-            "classes": self.classes_.tolist() if self.classes_ is not None else None,
-        })
+        params.update(
+            {
+                "n_components": self.n_components,
+                "regularization": self.regularization,
+                "n_classes": self.n_classes_,
+                "classes": self.classes_.tolist() if self.classes_ is not None else None,
+            }
+        )
         return params
 
 
@@ -329,9 +330,7 @@ class ShrinkageLDA(LDADecoder):
 
         return (1 - shrinkage) * cov + shrinkage * target
 
-    def _ledoit_wolf_shrinkage(
-        self, X: np.ndarray, y: np.ndarray, cov: np.ndarray
-    ) -> float:
+    def _ledoit_wolf_shrinkage(self, X: np.ndarray, y: np.ndarray, cov: np.ndarray) -> float:
         """Estimate optimal shrinkage using Ledoit-Wolf formula."""
         n_samples = X.shape[0]
         n_features = X.shape[1]

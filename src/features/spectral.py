@@ -10,7 +10,6 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 from scipy import signal
 
-
 # Standard frequency bands for neural analysis
 FREQUENCY_BANDS = {
     "delta": (0.5, 4),
@@ -222,8 +221,8 @@ def extract_spectral_features(
     band_powers = compute_band_power(data, fs, bands, relative=True)
 
     # Stack into feature vector
-    features = np.concatenate([
-        np.atleast_1d(band_powers[band]) for band in sorted(band_powers.keys())
-    ])
+    features = np.concatenate(
+        [np.atleast_1d(band_powers[band]) for band in sorted(band_powers.keys())]
+    )
 
     return features

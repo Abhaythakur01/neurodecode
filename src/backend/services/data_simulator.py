@@ -62,9 +62,7 @@ class NeuralDataSimulator:
         self._rng = np.random.default_rng(seed)
 
         # Generate random preferred directions for each neuron
-        self._preferred_directions = self._rng.uniform(
-            0, 2 * np.pi, size=n_neurons
-        )
+        self._preferred_directions = self._rng.uniform(0, 2 * np.pi, size=n_neurons)
 
         # Generate random baseline firing rates (Hz)
         self._baseline_rates = self._rng.uniform(5, 20, size=n_neurons)
@@ -107,9 +105,10 @@ class NeuralDataSimulator:
 
         elif self.pattern == MovementPattern.REACHING:
             # Reaching movements to random targets
-            if self._target_position is None or np.linalg.norm(
-                self._position - self._target_position
-            ) < 0.05:
+            if (
+                self._target_position is None
+                or np.linalg.norm(self._position - self._target_position) < 0.05
+            ):
                 # Generate new target
                 self._target_position = self._rng.uniform(-1, 1, size=2)
 
@@ -197,9 +196,7 @@ class NeuralDataSimulator:
 
         return firing_rates, self._position.copy()
 
-    def generate_batch(
-        self, n_samples: int, dt: float = 0.02
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def generate_batch(self, n_samples: int, dt: float = 0.02) -> Tuple[np.ndarray, np.ndarray]:
         """
         Generate a batch of neural data samples.
 
@@ -392,9 +389,7 @@ class SimulationRunner:
         logger.info(f"Simulation stopped: {stats}")
         return stats
 
-    def generate_calibration_data(
-        self, n_samples: int = 500
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def generate_calibration_data(self, n_samples: int = 500) -> Tuple[np.ndarray, np.ndarray]:
         """Generate calibration data for decoder training."""
         if self._simulator is None:
             self.configure()

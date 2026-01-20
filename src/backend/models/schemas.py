@@ -10,7 +10,6 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-
 # === Enums ===
 
 
@@ -62,7 +61,15 @@ class NeuralFrame(BaseModel):
         description="Firing rates array of shape (n_samples, n_neurons)"
     )
 
-    model_config = {"json_schema_extra": {"example": {"type": "neural_data", "timestamp": 1705678901234, "firing_rates": [[0.5, 0.3, 0.8, 0.2]]}}}
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "type": "neural_data",
+                "timestamp": 1705678901234,
+                "firing_rates": [[0.5, 0.3, 0.8, 0.2]],
+            }
+        }
+    }
 
 
 class DecoderInfo(BaseModel):
@@ -99,15 +106,25 @@ class PredictionResponse(BaseModel):
         description="Uncertainty [x_std, y_std]", min_length=2, max_length=2
     )
     selected_decoders: List[str] = Field(description="Names of decoders used")
-    decoder_weights: Dict[str, float] = Field(
-        description="Weight for each selected decoder"
-    )
+    decoder_weights: Dict[str, float] = Field(description="Weight for each selected decoder")
     latency_ms: float = Field(description="Total decoding latency in ms")
     decoder_states: Optional[List[DecoderInfo]] = Field(
         default=None, description="Full decoder state info (sent periodically)"
     )
 
-    model_config = {"json_schema_extra": {"example": {"type": "prediction", "timestamp": 1705678901256, "prediction": [0.23, -0.15], "uncertainty": [0.05, 0.04], "selected_decoders": ["Kalman", "SVM"], "decoder_weights": {"Kalman": 0.6, "SVM": 0.4}, "latency_ms": 22.5}}}
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "type": "prediction",
+                "timestamp": 1705678901256,
+                "prediction": [0.23, -0.15],
+                "uncertainty": [0.05, 0.04],
+                "selected_decoders": ["Kalman", "SVM"],
+                "decoder_weights": {"Kalman": 0.6, "SVM": 0.4},
+                "latency_ms": 22.5,
+            }
+        }
+    }
 
 
 class StatusMessage(BaseModel):
@@ -156,12 +173,8 @@ class SimulationConfig(BaseModel):
         default="circular",
         description="Movement pattern: 'circular', 'reaching', 'random'",
     )
-    speed: float = Field(
-        default=1.0, ge=0.1, le=5.0, description="Movement speed multiplier"
-    )
-    noise_level: float = Field(
-        default=0.1, ge=0.0, le=1.0, description="Neural noise level"
-    )
+    speed: float = Field(default=1.0, ge=0.1, le=5.0, description="Movement speed multiplier")
+    noise_level: float = Field(default=0.1, ge=0.0, le=1.0, description="Neural noise level")
     n_neurons: int = Field(default=50, ge=10, le=200, description="Number of neurons")
 
 

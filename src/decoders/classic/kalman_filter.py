@@ -268,12 +268,14 @@ class KalmanFilterDecoder(OnlineDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get decoder parameters."""
         params = super().get_params()
-        params.update({
-            "process_noise": self.process_noise,
-            "observation_noise": self.observation_noise,
-            "n_features": self.n_features,
-            "n_outputs": self.n_outputs,
-        })
+        params.update(
+            {
+                "process_noise": self.process_noise,
+                "observation_noise": self.observation_noise,
+                "n_features": self.n_features,
+                "n_outputs": self.n_outputs,
+            }
+        )
         return params
 
 

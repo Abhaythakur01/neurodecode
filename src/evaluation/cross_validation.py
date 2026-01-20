@@ -171,11 +171,13 @@ def cross_validate(
         fold_metrics.append(metrics)
 
         if return_predictions:
-            predictions.append({
-                "test_idx": test_idx,
-                "y_true": y_test,
-                "y_pred": y_pred,
-            })
+            predictions.append(
+                {
+                    "test_idx": test_idx,
+                    "y_true": y_test,
+                    "y_pred": y_pred,
+                }
+            )
 
     # Aggregate results
     results = {

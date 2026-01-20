@@ -86,7 +86,7 @@ class TestFiringRates:
 
         expected_bins = len(single_neuron) // 100
         assert len(binned) == expected_bins
-        assert binned.sum() == single_neuron[:expected_bins * 100].sum()
+        assert binned.sum() == single_neuron[: expected_bins * 100].sum()
 
     def test_gaussian_smooth_firing_rate(self):
         """Test Gaussian smoothing."""

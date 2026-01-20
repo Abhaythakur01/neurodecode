@@ -37,12 +37,8 @@ async def lifespan(app: FastAPI):
     # Pre-calibrate with synthetic data for immediate availability
     try:
         logger.info("Generating calibration data...")
-        X_cal, y_cal = simulation_runner.generate_calibration_data(
-            settings.calibration_samples
-        )
-        logger.info(
-            f"Calibration data generated: X={X_cal.shape}, y={y_cal.shape}"
-        )
+        X_cal, y_cal = simulation_runner.generate_calibration_data(settings.calibration_samples)
+        logger.info(f"Calibration data generated: X={X_cal.shape}, y={y_cal.shape}")
 
         logger.info("Initializing meta-learner...")
         scores = decoder_service.initialize(X_cal, y_cal)

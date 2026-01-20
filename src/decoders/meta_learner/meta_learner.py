@@ -279,8 +279,10 @@ class AdaptiveMetaLearner(OnlineDecoder):
 
         # Check latency constraint
         if result.total_latency_ms > self.max_latency_ms and self.verbose:
-            print(f"Warning: Latency {result.total_latency_ms:.1f}ms exceeds "
-                  f"target {self.max_latency_ms}ms")
+            print(
+                f"Warning: Latency {result.total_latency_ms:.1f}ms exceeds "
+                f"target {self.max_latency_ms}ms"
+            )
 
         self._last_prediction = result
         self._prediction_count += 1
@@ -337,7 +339,7 @@ class AdaptiveMetaLearner(OnlineDecoder):
             if wrapper.state == DecoderState.DISABLED:
                 continue
 
-            if hasattr(wrapper.decoder, 'update'):
+            if hasattr(wrapper.decoder, "update"):
                 try:
                     wrapper.decoder.update(X, y)
                     stats["updated_decoders"].append(name)
@@ -361,9 +363,7 @@ class AdaptiveMetaLearner(OnlineDecoder):
             futures = {}
             for name in selected:
                 wrapper = self._decoders[name]
-                future = self._executor.submit(
-                    self._predict_single_decoder, wrapper, X
-                )
+                future = self._executor.submit(self._predict_single_decoder, wrapper, X)
                 futures[future] = name
 
             for future in as_completed(futures):
@@ -398,7 +398,7 @@ class AdaptiveMetaLearner(OnlineDecoder):
         decoder = wrapper.decoder
 
         # Get prediction
-        if wrapper.supports_uncertainty and hasattr(decoder, 'predict_with_uncertainty'):
+        if wrapper.supports_uncertainty and hasattr(decoder, "predict_with_uncertainty"):
             prediction, uncertainty = decoder.predict_with_uncertainty(X)
         else:
             prediction = decoder.predict(X)
@@ -495,15 +495,17 @@ class AdaptiveMetaLearner(OnlineDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get meta-learner parameters."""
         params = super().get_params()
-        params.update({
-            "n_decoders": len(self._decoders),
-            "decoder_names": list(self._decoders.keys()),
-            "selection_strategy": self.selector.strategy.value,
-            "combination_strategy": self.combiner.strategy.value,
-            "parallel": self.parallel,
-            "max_latency_ms": self.max_latency_ms,
-            "prediction_count": self._prediction_count,
-        })
+        params.update(
+            {
+                "n_decoders": len(self._decoders),
+                "decoder_names": list(self._decoders.keys()),
+                "selection_strategy": self.selector.strategy.value,
+                "combination_strategy": self.combiner.strategy.value,
+                "parallel": self.parallel,
+                "max_latency_ms": self.max_latency_ms,
+                "prediction_count": self._prediction_count,
+            }
+        )
 
         # Add last prediction info
         if self._last_prediction:

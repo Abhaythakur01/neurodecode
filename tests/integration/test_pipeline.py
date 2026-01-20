@@ -24,18 +24,22 @@ def generate_synthetic_neural_data(
 
     # Generate smooth kinematics (2D trajectory)
     t = np.linspace(0, n_samples / fs, n_samples)
-    velocity = np.column_stack([
-        np.sin(2 * np.pi * 0.5 * t),  # 0.5 Hz oscillation
-        np.cos(2 * np.pi * 0.5 * t),
-    ])
+    velocity = np.column_stack(
+        [
+            np.sin(2 * np.pi * 0.5 * t),  # 0.5 Hz oscillation
+            np.cos(2 * np.pi * 0.5 * t),
+        ]
+    )
 
     # Generate neural activity based on velocity
     # Each neuron has a preferred direction
     preferred_directions = np.linspace(0, 2 * np.pi, n_neurons, endpoint=False)
-    tuning = np.column_stack([
-        np.cos(preferred_directions),
-        np.sin(preferred_directions),
-    ])
+    tuning = np.column_stack(
+        [
+            np.cos(preferred_directions),
+            np.sin(preferred_directions),
+        ]
+    )
 
     # Neural activity = velocity · tuning^T + baseline + noise
     baseline = 20  # Mean firing rate
@@ -199,9 +203,7 @@ class TestRealTimeSimulation:
         decoder = KalmanFilterDecoder(learning_rate=0.05)
         decoder.fit(neural_data[:train_end], kinematics[:train_end])
 
-        initial_metrics = decoder.evaluate(
-            neural_data[adapt_end:], kinematics[adapt_end:]
-        )
+        initial_metrics = decoder.evaluate(neural_data[adapt_end:], kinematics[adapt_end:])
 
         # Online adaptation phase
         for i in range(train_end, adapt_end, 10):
@@ -212,9 +214,7 @@ class TestRealTimeSimulation:
         assert decoder._update_count > 0
 
         # Evaluate after adaptation
-        final_metrics = decoder.evaluate(
-            neural_data[adapt_end:], kinematics[adapt_end:]
-        )
+        final_metrics = decoder.evaluate(neural_data[adapt_end:], kinematics[adapt_end:])
 
         # Performance may or may not improve depending on data
         # Just verify metrics are computed

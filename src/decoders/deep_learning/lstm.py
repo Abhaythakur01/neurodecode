@@ -206,24 +206,16 @@ class LSTMDecoder(OnlineDecoder):
         y_train, y_val = y_seq[:val_split], y_seq[val_split:]
 
         # Create data loaders
-        train_dataset = TensorDataset(
-            torch.FloatTensor(X_train), torch.FloatTensor(y_train)
-        )
-        train_loader = DataLoader(
-            train_dataset, batch_size=self.batch_size, shuffle=True
-        )
+        train_dataset = TensorDataset(torch.FloatTensor(X_train), torch.FloatTensor(y_train))
+        train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
 
-        val_dataset = TensorDataset(
-            torch.FloatTensor(X_val), torch.FloatTensor(y_val)
-        )
+        val_dataset = TensorDataset(torch.FloatTensor(X_val), torch.FloatTensor(y_val))
         val_loader = DataLoader(val_dataset, batch_size=self.batch_size)
 
         # Initialize model
         self._model = self._build_model().to(self.device)
 
-        self._optimizer = torch.optim.Adam(
-            self._model.parameters(), lr=self.learning_rate
-        )
+        self._optimizer = torch.optim.Adam(self._model.parameters(), lr=self.learning_rate)
         criterion = nn.MSELoss()
 
         # Training loop
@@ -269,8 +261,10 @@ class LSTMDecoder(OnlineDecoder):
             self._val_losses.append(val_loss)
 
             if self.verbose:
-                print(f"Epoch {epoch + 1}/{self.n_epochs}: "
-                      f"Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}")
+                print(
+                    f"Epoch {epoch + 1}/{self.n_epochs}: "
+                    f"Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}"
+                )
 
             # Early stopping
             if val_loss < best_val_loss:
@@ -405,9 +399,7 @@ class LSTMDecoder(OnlineDecoder):
         """Reset hidden state (for new trial/session)."""
         self._hidden = None
 
-    def _create_sequences(
-        self, X: np.ndarray, y: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _create_sequences(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Create sequences for training."""
         n_samples = X.shape[0]
         n_sequences = n_samples - self.sequence_length + 1
@@ -445,17 +437,19 @@ class LSTMDecoder(OnlineDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get decoder parameters."""
         params = super().get_params()
-        params.update({
-            "hidden_size": self.hidden_size,
-            "num_layers": self.num_layers,
-            "dropout": self.dropout,
-            "batch_size": self.batch_size,
-            "n_epochs": self.n_epochs,
-            "sequence_length": self.sequence_length,
-            "bidirectional": self.bidirectional,
-            "device": str(self.device) if self.device else None,
-            "train_losses": self._train_losses[-10:] if self._train_losses else [],
-        })
+        params.update(
+            {
+                "hidden_size": self.hidden_size,
+                "num_layers": self.num_layers,
+                "dropout": self.dropout,
+                "batch_size": self.batch_size,
+                "n_epochs": self.n_epochs,
+                "sequence_length": self.sequence_length,
+                "bidirectional": self.bidirectional,
+                "device": str(self.device) if self.device else None,
+                "train_losses": self._train_losses[-10:] if self._train_losses else [],
+            }
+        )
         return params
 
 

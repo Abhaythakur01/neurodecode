@@ -72,7 +72,7 @@ class WienerFilterDecoder(BaseDecoder):
 
         # Create lagged feature matrix
         X_lagged = self._create_lagged_features(X)
-        y_aligned = y[self.n_lags:]  # Align targets with lagged features
+        y_aligned = y[self.n_lags :]  # Align targets with lagged features
 
         self.n_features = X_lagged.shape[1]
 
@@ -142,11 +142,13 @@ class WienerFilterDecoder(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get decoder parameters."""
         params = super().get_params()
-        params.update({
-            "n_lags": self.n_lags,
-            "regularization": self.regularization,
-            "original_n_features": self._original_n_features,
-        })
+        params.update(
+            {
+                "n_lags": self.n_lags,
+                "regularization": self.regularization,
+                "original_n_features": self._original_n_features,
+            }
+        )
         return params
 
 
@@ -275,8 +277,10 @@ class NonCausalWienerFilter(WienerFilterDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get decoder parameters."""
         params = super().get_params()
-        params.update({
-            "n_lags_past": self.n_lags_past,
-            "n_lags_future": self.n_lags_future,
-        })
+        params.update(
+            {
+                "n_lags_past": self.n_lags_past,
+                "n_lags_future": self.n_lags_future,
+            }
+        )
         return params

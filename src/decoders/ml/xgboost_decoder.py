@@ -72,8 +72,7 @@ class XGBoostDecoder(BaseDecoder):
         """
         if not XGBOOST_AVAILABLE:
             raise ImportError(
-                "XGBoost is required for XGBoostDecoder. "
-                "Install with: pip install xgboost"
+                "XGBoost is required for XGBoostDecoder. " "Install with: pip install xgboost"
             )
 
         super().__init__(name=name)
@@ -142,7 +141,8 @@ class XGBoostDecoder(BaseDecoder):
                 y_train, y_val = y[:val_split, i], y[val_split:, i]
 
                 model.fit(
-                    X_train, y_train,
+                    X_train,
+                    y_train,
                     eval_set=[(X_val, y_val)],
                     verbose=self.verbose,
                 )
@@ -156,7 +156,7 @@ class XGBoostDecoder(BaseDecoder):
         self.feature_importances_ = importances / self.n_outputs
 
         # Store best iteration from first model
-        if hasattr(self._models[0], 'best_iteration'):
+        if hasattr(self._models[0], "best_iteration"):
             self.best_iteration_ = self._models[0].best_iteration
 
         self.is_fitted = True
@@ -211,7 +211,7 @@ class XGBoostDecoder(BaseDecoder):
             # Convert to array
             scores = np.zeros(self.n_features)
             for k, v in importance.items():
-                idx = int(k.replace('f', ''))
+                idx = int(k.replace("f", ""))
                 scores[idx] = v
             return dict(zip(feature_names, scores))
 
@@ -220,14 +220,16 @@ class XGBoostDecoder(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get decoder parameters."""
         params = super().get_params()
-        params.update({
-            "n_estimators": self.n_estimators,
-            "max_depth": self.max_depth,
-            "learning_rate": self.learning_rate,
-            "subsample": self.subsample,
-            "reg_alpha": self.reg_alpha,
-            "reg_lambda": self.reg_lambda,
-        })
+        params.update(
+            {
+                "n_estimators": self.n_estimators,
+                "max_depth": self.max_depth,
+                "learning_rate": self.learning_rate,
+                "subsample": self.subsample,
+                "reg_alpha": self.reg_alpha,
+                "reg_lambda": self.reg_lambda,
+            }
+        )
         if self.best_iteration_ is not None:
             params["best_iteration"] = self.best_iteration_
         return params
@@ -278,8 +280,7 @@ class XGBoostClassifier(BaseDecoder):
         """
         if not XGBOOST_AVAILABLE:
             raise ImportError(
-                "XGBoost is required for XGBoostClassifier. "
-                "Install with: pip install xgboost"
+                "XGBoost is required for XGBoostClassifier. " "Install with: pip install xgboost"
             )
 
         super().__init__(name=name)
@@ -350,7 +351,8 @@ class XGBoostClassifier(BaseDecoder):
             y_train, y_val = y[:val_split], y[val_split:]
 
             self._model.fit(
-                X_train, y_train,
+                X_train,
+                y_train,
                 eval_set=[(X_val, y_val)],
                 verbose=self.verbose,
             )
@@ -432,10 +434,12 @@ class XGBoostClassifier(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get classifier parameters."""
         params = super().get_params()
-        params.update({
-            "n_estimators": self.n_estimators,
-            "max_depth": self.max_depth,
-            "learning_rate": self.learning_rate,
-            "n_classes": len(self.classes_) if self.classes_ is not None else None,
-        })
+        params.update(
+            {
+                "n_estimators": self.n_estimators,
+                "max_depth": self.max_depth,
+                "learning_rate": self.learning_rate,
+                "n_classes": len(self.classes_) if self.classes_ is not None else None,
+            }
+        )
         return params

@@ -139,8 +139,8 @@ class OnlineAdapter:
 
             # Trim buffer
             if len(self._update_buffer_X) > self._buffer_size:
-                self._update_buffer_X = self._update_buffer_X[-self._buffer_size:]
-                self._update_buffer_y = self._update_buffer_y[-self._buffer_size:]
+                self._update_buffer_X = self._update_buffer_X[-self._buffer_size :]
+                self._update_buffer_y = self._update_buffer_y[-self._buffer_size :]
 
         # Periodically update decoders
         if self._step_count % self.update_interval == 0:
@@ -200,10 +200,7 @@ class OnlineAdapter:
             if name not in self._weight_velocities:
                 self._weight_velocities[name] = 0.0
 
-            velocity = (
-                self.momentum * self._weight_velocities[name]
-                - self.learning_rate * gradient
-            )
+            velocity = self.momentum * self._weight_velocities[name] - self.learning_rate * gradient
             self._weight_velocities[name] = velocity
 
             # Weight decay (pull toward 1.0)
@@ -247,12 +244,10 @@ class OnlineAdapter:
             # Compare recent to baseline
             if name not in self._baseline_errors:
                 # Establish baseline
-                self._baseline_errors[name] = np.mean(
-                    history[:self.degradation_window]
-                )
+                self._baseline_errors[name] = np.mean(history[: self.degradation_window])
 
             baseline = self._baseline_errors[name]
-            recent = np.mean(history[-self.degradation_window:])
+            recent = np.mean(history[-self.degradation_window :])
 
             # Check for significant degradation
             relative_increase = (recent - baseline) / (baseline + 1e-10)
@@ -263,12 +258,14 @@ class OnlineAdapter:
                 wrapper.state = DecoderState.DEGRADED
                 wrapper.weight *= 0.5  # Reduce weight
 
-                changes.append({
-                    "decoder": name,
-                    "old_state": old_state.value,
-                    "new_state": DecoderState.DEGRADED.value,
-                    "reason": f"Error increased by {relative_increase:.1%}",
-                })
+                changes.append(
+                    {
+                        "decoder": name,
+                        "old_state": old_state.value,
+                        "new_state": DecoderState.DEGRADED.value,
+                        "reason": f"Error increased by {relative_increase:.1%}",
+                    }
+                )
 
         return changes
 
@@ -296,7 +293,7 @@ class OnlineAdapter:
                 continue
 
             baseline = self._baseline_errors[name]
-            recent = np.mean(history[-self.degradation_window:])
+            recent = np.mean(history[-self.degradation_window :])
 
             relative_diff = (recent - baseline) / (baseline + 1e-10)
 
@@ -305,12 +302,14 @@ class OnlineAdapter:
                 wrapper.state = DecoderState.STANDBY
                 wrapper.weight = min(1.0, wrapper.weight * 1.5)
 
-                changes.append({
-                    "decoder": name,
-                    "old_state": DecoderState.DEGRADED.value,
-                    "new_state": DecoderState.STANDBY.value,
-                    "reason": "Performance recovered",
-                })
+                changes.append(
+                    {
+                        "decoder": name,
+                        "old_state": DecoderState.DEGRADED.value,
+                        "new_state": DecoderState.STANDBY.value,
+                        "reason": "Performance recovered",
+                    }
+                )
 
         return changes
 
@@ -335,7 +334,7 @@ class OnlineAdapter:
             decoder = wrapper.decoder
 
             # Check if decoder supports online updates
-            if hasattr(decoder, 'update'):
+            if hasattr(decoder, "update"):
                 try:
                     decoder.update(X, y)
                     updated.append(name)
@@ -357,7 +356,7 @@ class OnlineAdapter:
         for name, wrapper in decoders.items():
             if name in self._error_history and self._error_history[name]:
                 self._baseline_errors[name] = np.mean(
-                    self._error_history[name][-self.degradation_window:]
+                    self._error_history[name][-self.degradation_window :]
                 )
 
     def force_update(
@@ -385,13 +384,13 @@ class OnlineAdapter:
 
             decoder = wrapper.decoder
 
-            if hasattr(decoder, 'update'):
+            if hasattr(decoder, "update"):
                 try:
                     decoder.update(X, y)
                     updated.append(name)
                 except Exception:
                     pass
-            elif hasattr(decoder, 'partial_fit'):
+            elif hasattr(decoder, "partial_fit"):
                 try:
                     decoder.partial_fit(X, y)
                     updated.append(name)

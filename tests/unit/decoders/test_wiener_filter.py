@@ -133,9 +133,7 @@ class TestWienerFilterDecoder:
         decoder_high_reg.fit(X, y)
 
         # High regularization should lead to smaller weights
-        assert np.mean(np.abs(decoder_high_reg.weights)) < np.mean(
-            np.abs(decoder_low_reg.weights)
-        )
+        assert np.mean(np.abs(decoder_high_reg.weights)) < np.mean(np.abs(decoder_low_reg.weights))
 
     def test_create_lagged_features(self, linear_data):
         """Test lagged feature creation."""

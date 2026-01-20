@@ -48,9 +48,7 @@ async def start_simulation(
     global _current_state
 
     if _current_state == SimulationState.RUNNING:
-        raise HTTPException(
-            status_code=400, detail="Simulation is already running"
-        )
+        raise HTTPException(status_code=400, detail="Simulation is already running")
 
     # Get config
     config = request.config if request and request.config else SimulationConfig()
@@ -58,9 +56,7 @@ async def start_simulation(
     # Ensure decoder service is initialized
     if not decoder_service.is_ready:
         logger.info("Initializing decoder service before simulation...")
-        X_cal, y_cal = simulation_runner.generate_calibration_data(
-            settings.calibration_samples
-        )
+        X_cal, y_cal = simulation_runner.generate_calibration_data(settings.calibration_samples)
         decoder_service.initialize(X_cal, y_cal)
 
     # Configure simulator

@@ -137,9 +137,7 @@ class DecoderService:
 
             return scores
 
-    def _create_decoders(
-        self, include_decoders: Optional[List[str]] = None
-    ) -> List[Any]:
+    def _create_decoders(self, include_decoders: Optional[List[str]] = None) -> List[Any]:
         """Create decoder instances based on configuration."""
         all_decoders = {
             "Kalman": lambda: KalmanFilterDecoder(name="Kalman"),
@@ -205,9 +203,7 @@ class DecoderService:
 
         return result, latency_ms
 
-    def update_online(
-        self, features: np.ndarray, true_target: np.ndarray
-    ) -> Dict[str, Any]:
+    def update_online(self, features: np.ndarray, true_target: np.ndarray) -> Dict[str, Any]:
         """
         Online update with true target feedback.
 

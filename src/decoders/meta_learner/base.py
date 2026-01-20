@@ -15,15 +15,17 @@ from src.decoders.base import BaseDecoder
 
 class DecoderState(Enum):
     """State of a decoder in the meta-learner."""
-    ACTIVE = "active"           # Currently being used
-    STANDBY = "standby"         # Ready but not selected
-    DEGRADED = "degraded"       # Performance has dropped
-    DISABLED = "disabled"       # Temporarily disabled
+
+    ACTIVE = "active"  # Currently being used
+    STANDBY = "standby"  # Ready but not selected
+    DEGRADED = "degraded"  # Performance has dropped
+    DISABLED = "disabled"  # Temporarily disabled
 
 
 @dataclass
 class DecoderMetrics:
     """Performance metrics for a single decoder."""
+
     name: str
     r2_history: List[float] = field(default_factory=list)
     mse_history: List[float] = field(default_factory=list)
@@ -38,15 +40,15 @@ class DecoderMetrics:
         """Get recent average R²."""
         if not self.r2_history:
             return 0.0
-        recent = self.r2_history[-self.window_size:]
+        recent = self.r2_history[-self.window_size :]
         return np.mean(recent)
 
     @property
     def recent_mse(self) -> float:
         """Get recent average MSE."""
         if not self.mse_history:
-            return float('inf')
-        recent = self.mse_history[-self.window_size:]
+            return float("inf")
+        recent = self.mse_history[-self.window_size :]
         return np.mean(recent)
 
     @property
@@ -54,7 +56,7 @@ class DecoderMetrics:
         """Get recent average latency."""
         if not self.latency_history:
             return 0.0
-        recent = self.latency_history[-self.window_size:]
+        recent = self.latency_history[-self.window_size :]
         return np.mean(recent)
 
     @property
@@ -62,7 +64,7 @@ class DecoderMetrics:
         """Get recent average uncertainty."""
         if not self.uncertainty_history:
             return 1.0
-        recent = self.uncertainty_history[-self.window_size:]
+        recent = self.uncertainty_history[-self.window_size :]
         return np.mean(recent)
 
     @property
@@ -75,8 +77,8 @@ class DecoderMetrics:
         if len(recent) < 10:
             return 0.0
 
-        first_half = np.mean(recent[:len(recent)//2])
-        second_half = np.mean(recent[len(recent)//2:])
+        first_half = np.mean(recent[: len(recent) // 2])
+        second_half = np.mean(recent[len(recent) // 2 :])
         return second_half - first_half
 
     @property
@@ -84,7 +86,7 @@ class DecoderMetrics:
         """Calculate performance stability (lower = more stable)."""
         if len(self.r2_history) < 5:
             return 1.0
-        recent = self.r2_history[-self.window_size:]
+        recent = self.r2_history[-self.window_size :]
         return np.std(recent) if len(recent) > 1 else 0.0
 
     def update(
@@ -121,6 +123,7 @@ class DecoderMetrics:
 @dataclass
 class DecoderWrapper:
     """Wrapper for a decoder with its state and metrics."""
+
     decoder: BaseDecoder
     state: DecoderState = DecoderState.STANDBY
     metrics: DecoderMetrics = None
@@ -132,12 +135,13 @@ class DecoderWrapper:
             self.metrics = DecoderMetrics(name=self.decoder.name)
 
         # Check if decoder supports uncertainty estimation
-        self.supports_uncertainty = hasattr(self.decoder, 'predict_with_uncertainty')
+        self.supports_uncertainty = hasattr(self.decoder, "predict_with_uncertainty")
 
 
 @dataclass
 class PredictionResult:
     """Result from a decoder prediction."""
+
     decoder_name: str
     prediction: np.ndarray
     uncertainty: Optional[np.ndarray] = None
@@ -156,6 +160,7 @@ class PredictionResult:
 @dataclass
 class EnsembleResult:
     """Result from ensemble prediction."""
+
     prediction: np.ndarray
     uncertainty: Optional[np.ndarray]
     decoder_weights: Dict[str, float]
@@ -166,17 +171,19 @@ class EnsembleResult:
 
 class SelectionStrategy(Enum):
     """Strategy for decoder selection."""
-    BEST = "best"                     # Select single best decoder
-    TOP_K = "top_k"                   # Select top K decoders
-    THRESHOLD = "threshold"           # Select all above threshold
-    UNCERTAINTY_AWARE = "uncertainty" # Weight by uncertainty
-    ADAPTIVE = "adaptive"             # Dynamically adjust strategy
+
+    BEST = "best"  # Select single best decoder
+    TOP_K = "top_k"  # Select top K decoders
+    THRESHOLD = "threshold"  # Select all above threshold
+    UNCERTAINTY_AWARE = "uncertainty"  # Weight by uncertainty
+    ADAPTIVE = "adaptive"  # Dynamically adjust strategy
 
 
 class CombinationStrategy(Enum):
     """Strategy for combining decoder outputs."""
-    MEAN = "mean"                     # Simple average
-    WEIGHTED_MEAN = "weighted_mean"   # Weighted by performance
-    MEDIAN = "median"                 # Robust median
-    STACKING = "stacking"             # Meta-model stacking
+
+    MEAN = "mean"  # Simple average
+    WEIGHTED_MEAN = "weighted_mean"  # Weighted by performance
+    MEDIAN = "median"  # Robust median
+    STACKING = "stacking"  # Meta-model stacking
     UNCERTAINTY_WEIGHTED = "uncertainty_weighted"  # Weight by confidence

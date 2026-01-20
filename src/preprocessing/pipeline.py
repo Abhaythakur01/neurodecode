@@ -10,7 +10,12 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 from src.preprocessing.artifacts import detect_outliers, interpolate_bad_segments, remove_outliers
-from src.preprocessing.filters import bandpass_filter, lowpass_filter, notch_filter, remove_line_noise
+from src.preprocessing.filters import (
+    bandpass_filter,
+    lowpass_filter,
+    notch_filter,
+    remove_line_noise,
+)
 from src.preprocessing.normalization import Normalizer, zscore_normalize
 from src.preprocessing.spike_detection import detect_spikes_multichannel
 
@@ -200,9 +205,7 @@ class SpikePreprocessingPipeline(PreprocessingPipeline):
         self.spike_threshold_std = spike_threshold_std
         self._spike_times: Optional[List[np.ndarray]] = None
 
-    def transform_with_spikes(
-        self, data: np.ndarray
-    ) -> Tuple[np.ndarray, List[np.ndarray]]:
+    def transform_with_spikes(self, data: np.ndarray) -> Tuple[np.ndarray, List[np.ndarray]]:
         """
         Transform data and detect spikes.
 

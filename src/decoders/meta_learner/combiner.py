@@ -76,17 +76,14 @@ class DecoderCombiner:
         """
         # Filter to selected decoders
         selected_predictions = {
-            name: pred for name, pred in predictions.items()
-            if name in selected
+            name: pred for name, pred in predictions.items() if name in selected
         }
 
         if not selected_predictions:
             raise ValueError("No predictions to combine")
 
         # Align predictions to common shape (use minimum length)
-        min_samples = min(
-            pred.prediction.shape[0] for pred in selected_predictions.values()
-        )
+        min_samples = min(pred.prediction.shape[0] for pred in selected_predictions.values())
 
         # Truncate all predictions to minimum length (take last samples)
         aligned_predictions = {}
@@ -97,7 +94,9 @@ class DecoderCombiner:
                 aligned_pred = PredictionResult(
                     decoder_name=pred.decoder_name,
                     prediction=pred.prediction[-min_samples:],
-                    uncertainty=pred.uncertainty[-min_samples:] if pred.uncertainty is not None else None,
+                    uncertainty=(
+                        pred.uncertainty[-min_samples:] if pred.uncertainty is not None else None
+                    ),
                     latency_ms=pred.latency_ms,
                 )
                 aligned_predictions[name] = aligned_pred
@@ -107,9 +106,7 @@ class DecoderCombiner:
         selected_predictions = aligned_predictions
 
         # Get prediction arrays
-        pred_arrays = {
-            name: pred.prediction for name, pred in selected_predictions.items()
-        }
+        pred_arrays = {name: pred.prediction for name, pred in selected_predictions.items()}
 
         # Compute weights
         weights = self._compute_weights(selected_predictions, decoders)
@@ -131,9 +128,7 @@ class DecoderCombiner:
             combined, uncertainty = self._combine_weighted_mean(pred_arrays, weights)
 
         # Compute total latency
-        total_latency = max(
-            pred.latency_ms for pred in selected_predictions.values()
-        )
+        total_latency = max(pred.latency_ms for pred in selected_predictions.values())
 
         return EnsembleResult(
             prediction=combined,
@@ -175,9 +170,7 @@ class DecoderCombiner:
 
         return weights
 
-    def _combine_mean(
-        self, predictions: Dict[str, np.ndarray]
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _combine_mean(self, predictions: Dict[str, np.ndarray]) -> Tuple[np.ndarray, np.ndarray]:
         """Simple mean combination."""
         if not predictions:
             raise ValueError("No predictions to combine")
@@ -217,8 +210,7 @@ class DecoderCombiner:
         if len(predictions) > 1:
             mean_expanded = combined[np.newaxis, ...]
             variance = np.sum(
-                weight_array[:, np.newaxis] * (pred_stack - mean_expanded) ** 2,
-                axis=0
+                weight_array[:, np.newaxis] * (pred_stack - mean_expanded) ** 2, axis=0
             )
             uncertainty = np.sqrt(variance)
         else:
@@ -226,9 +218,7 @@ class DecoderCombiner:
 
         return combined, uncertainty
 
-    def _combine_median(
-        self, predictions: Dict[str, np.ndarray]
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _combine_median(self, predictions: Dict[str, np.ndarray]) -> Tuple[np.ndarray, np.ndarray]:
         """Median combination (robust to outliers)."""
         if not predictions:
             raise ValueError("No predictions to combine")
@@ -309,10 +299,7 @@ class DecoderCombiner:
         # unc_stack shape: (n_decoders, n_samples, n_outputs)
         # weight_array shape: (n_decoders,)
         weight_broadcast = weight_array.reshape(-1, 1, 1)
-        combined_uncertainty = np.sqrt(np.sum(
-            (weight_broadcast ** 2) * (unc_stack ** 2),
-            axis=0
-        ))
+        combined_uncertainty = np.sqrt(np.sum((weight_broadcast**2) * (unc_stack**2), axis=0))
 
         return combined, combined_uncertainty
 
@@ -339,7 +326,7 @@ class DecoderCombiner:
         pred_stack = pred_stack.transpose(1, 0, 2)
 
         # Apply weights: (n_samples, n_outputs)
-        combined = np.einsum('ijk,jk->ik', pred_stack, self._stacking_weights[:n_decoders])
+        combined = np.einsum("ijk,jk->ik", pred_stack, self._stacking_weights[:n_decoders])
 
         if self._stacking_bias is not None:
             combined += self._stacking_bias
@@ -375,7 +362,9 @@ class DecoderCombiner:
             preds = [pred_dict[name] for name in decoder_names]
             all_preds.append(np.stack(preds, axis=0))
 
-        X = np.concatenate(all_preds, axis=1).transpose(1, 0, 2)  # (n_samples, n_decoders, n_outputs)
+        X = np.concatenate(all_preds, axis=1).transpose(
+            1, 0, 2
+        )  # (n_samples, n_decoders, n_outputs)
         y = targets
 
         # Simple least squares for each output dimension
@@ -387,7 +376,7 @@ class DecoderCombiner:
         for o in range(n_outputs):
             # Solve: X @ w = y
             X_o = X[:, :, o]  # (n_samples, n_decoders)
-            y_o = y[:, o]     # (n_samples,)
+            y_o = y[:, o]  # (n_samples,)
 
             # Ridge regression
             lambda_reg = 0.1

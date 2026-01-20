@@ -5,10 +5,7 @@ Unit tests for Random Forest decoder.
 import numpy as np
 import pytest
 
-from src.decoders.ml.random_forest import (
-    RandomForestClassifierDecoder,
-    RandomForestDecoder,
-)
+from src.decoders.ml.random_forest import RandomForestClassifierDecoder, RandomForestDecoder
 
 
 @pytest.fixture
@@ -23,10 +20,12 @@ def regression_data():
     X = np.random.randn(n_samples, n_features)
 
     # Target depends on first few features
-    y = np.column_stack([
-        2 * X[:, 0] + X[:, 1] - X[:, 2] + 0.5 * np.random.randn(n_samples),
-        X[:, 0] - 2 * X[:, 3] + X[:, 4] + 0.5 * np.random.randn(n_samples),
-    ])
+    y = np.column_stack(
+        [
+            2 * X[:, 0] + X[:, 1] - X[:, 2] + 0.5 * np.random.randn(n_samples),
+            X[:, 0] - 2 * X[:, 3] + X[:, 4] + 0.5 * np.random.randn(n_samples),
+        ]
+    )
 
     return X, y
 
@@ -227,9 +226,7 @@ class TestRandomForestClassifierDecoder:
     def test_get_params(self, classification_data):
         """Test get_params method."""
         X, y = classification_data
-        clf = RandomForestClassifierDecoder(
-            n_estimators=100, max_depth=10, random_state=42
-        )
+        clf = RandomForestClassifierDecoder(n_estimators=100, max_depth=10, random_state=42)
         clf.fit(X, y)
 
         params = clf.get_params()

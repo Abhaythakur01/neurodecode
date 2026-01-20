@@ -3,19 +3,25 @@ NeuroDecode: Real-Time Adaptive Brain-Computer Interface
 Setup configuration for package installation
 """
 
-from setuptools import setup, find_packages
 from pathlib import Path
+
+from setuptools import find_packages, setup
 
 # Read the contents of README file
 this_directory = Path(__file__).parent
-long_description = (this_directory / "README.md").read_text(encoding='utf-8')
+long_description = (this_directory / "README.md").read_text(encoding="utf-8")
+
 
 # Read requirements
 def read_requirements(filename):
     """Read requirements from file."""
-    with open(filename, 'r', encoding='utf-8') as f:
-        return [line.strip() for line in f
-                if line.strip() and not line.startswith('#') and not line.startswith('-r')]
+    with open(filename, "r", encoding="utf-8") as f:
+        return [
+            line.strip()
+            for line in f
+            if line.strip() and not line.startswith("#") and not line.startswith("-r")
+        ]
+
 
 setup(
     name="neurodecode",

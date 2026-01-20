@@ -353,7 +353,7 @@ class TestOnlineAdapter:
             individual_predictions={
                 "Kalman": np.array([[0.4, 0.4]]),  # Close to true
                 "Wiener": np.array([[0.6, 0.6]]),  # Also close
-                "RF": np.array([[1.0, 1.0]]),      # Further away
+                "RF": np.array([[1.0, 1.0]]),  # Further away
             },
             selected_decoders=list(decoders.keys()),
             total_latency_ms=10.0,
@@ -487,7 +487,7 @@ class TestAdaptiveMetaLearner:
         n_samples = result.prediction.shape[0]
 
         # Align y_true with prediction length (use last n_samples)
-        stats = meta.update(X[200:200+n_samples], y[200:200+n_samples], adapt=False)
+        stats = meta.update(X[200 : 200 + n_samples], y[200 : 200 + n_samples], adapt=False)
 
         assert "updated_decoders" in stats
 
@@ -535,9 +535,7 @@ class TestAdaptiveMetaLearner:
             WienerFilterDecoder(name="W1", n_lags=3),
         ]
 
-        meta = create_default_meta_learner(
-            unfitted_decoders, X, y, verbose=False
-        )
+        meta = create_default_meta_learner(unfitted_decoders, X, y, verbose=False)
 
         assert meta.is_fitted
         assert len(meta._decoders) == 2

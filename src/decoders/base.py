@@ -204,8 +204,10 @@ class OnlineDecoder(BaseDecoder):
 
     def get_params(self) -> Dict[str, Any]:
         params = super().get_params()
-        params.update({
-            "learning_rate": self.learning_rate,
-            "update_count": self._update_count,
-        })
+        params.update(
+            {
+                "learning_rate": self.learning_rate,
+                "update_count": self._update_count,
+            }
+        )
         return params

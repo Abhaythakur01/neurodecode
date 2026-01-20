@@ -44,17 +44,13 @@ class ConnectionManager:
         await websocket.accept()
         async with self._lock:
             self.active_connections.add(websocket)
-        logger.info(
-            f"WebSocket connected. Total connections: {len(self.active_connections)}"
-        )
+        logger.info(f"WebSocket connected. Total connections: {len(self.active_connections)}")
 
     async def disconnect(self, websocket: WebSocket):
         """Remove a connection."""
         async with self._lock:
             self.active_connections.discard(websocket)
-        logger.info(
-            f"WebSocket disconnected. Total connections: {len(self.active_connections)}"
-        )
+        logger.info(f"WebSocket disconnected. Total connections: {len(self.active_connections)}")
 
     @property
     def connection_count(self) -> int:
@@ -160,9 +156,7 @@ async def websocket_decode(websocket: WebSocket):
         while simulation_running:
             try:
                 # Generate sample
-                firing_rates, position = simulation_runner._simulator.generate_sample(
-                    interval
-                )
+                firing_rates, position = simulation_runner._simulator.generate_sample(interval)
                 timestamp = time.time() * 1000
 
                 # Create frame and process
@@ -262,9 +256,7 @@ async def websocket_decode(websocket: WebSocket):
                     simulation_running = True
                     simulation_task = asyncio.create_task(run_simulation())
 
-                    await websocket.send_json(
-                        {"type": "status", "message": "Simulation started"}
-                    )
+                    await websocket.send_json({"type": "status", "message": "Simulation started"})
 
                 elif msg_type == "stop_simulation":
                     simulation_running = False
@@ -276,9 +268,7 @@ async def websocket_decode(websocket: WebSocket):
                             pass
                         simulation_task = None
 
-                    await websocket.send_json(
-                        {"type": "status", "message": "Simulation stopped"}
-                    )
+                    await websocket.send_json({"type": "status", "message": "Simulation stopped"})
 
             except asyncio.TimeoutError:
                 # Connection might be stale, send heartbeat

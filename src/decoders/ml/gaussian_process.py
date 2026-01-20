@@ -186,9 +186,7 @@ class GaussianProcessDecoder(BaseDecoder):
 
         return predictions
 
-    def predict_with_uncertainty(
-        self, X: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def predict_with_uncertainty(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """
         Decode kinematics with uncertainty estimates.
 
@@ -233,9 +231,7 @@ class GaussianProcessDecoder(BaseDecoder):
         _, uncertainty = self.predict_with_uncertainty(X)
         return uncertainty
 
-    def sample_predictions(
-        self, X: np.ndarray, n_samples: int = 10
-    ) -> np.ndarray:
+    def sample_predictions(self, X: np.ndarray, n_samples: int = 10) -> np.ndarray:
         """
         Sample from the posterior predictive distribution.
 
@@ -288,13 +284,15 @@ class GaussianProcessDecoder(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get decoder parameters."""
         params = super().get_params()
-        params.update({
-            "kernel": self.kernel_type,
-            "length_scale": self.length_scale,
-            "noise_level": self.noise_level,
-            "normalize_y": self.normalize_y,
-            "normalize_X": self.normalize_X,
-        })
+        params.update(
+            {
+                "kernel": self.kernel_type,
+                "length_scale": self.length_scale,
+                "noise_level": self.noise_level,
+                "normalize_y": self.normalize_y,
+                "normalize_X": self.normalize_X,
+            }
+        )
         if self.is_fitted:
             params["n_outputs"] = self.n_outputs
         return params
@@ -355,18 +353,18 @@ class SparseGPDecoder(BaseDecoder):
         # K-means iterations
         for _ in range(10):
             # Assign points to nearest inducing point
-            distances = np.array([
-                np.sum((X - inducing[k]) ** 2, axis=1)
-                for k in range(self.n_inducing)
-            ]).T
+            distances = np.array(
+                [np.sum((X - inducing[k]) ** 2, axis=1) for k in range(self.n_inducing)]
+            ).T
             assignments = np.argmin(distances, axis=1)
 
             # Update inducing points
-            new_inducing = np.array([
-                X[assignments == k].mean(axis=0) if np.any(assignments == k)
-                else inducing[k]
-                for k in range(self.n_inducing)
-            ])
+            new_inducing = np.array(
+                [
+                    X[assignments == k].mean(axis=0) if np.any(assignments == k) else inducing[k]
+                    for k in range(self.n_inducing)
+                ]
+            )
 
             if np.allclose(inducing, new_inducing):
                 break
@@ -408,10 +406,12 @@ class SparseGPDecoder(BaseDecoder):
 
         for i in range(self.n_outputs):
             # Find nearest training point for each inducing point
-            distances = np.array([
-                np.sum((X - self._inducing_points[k]) ** 2, axis=1)
-                for k in range(len(self._inducing_points))
-            ])
+            distances = np.array(
+                [
+                    np.sum((X - self._inducing_points[k]) ** 2, axis=1)
+                    for k in range(len(self._inducing_points))
+                ]
+            )
             nearest_idx = np.argmin(distances, axis=1)
             y_inducing = y[nearest_idx, i]
 
@@ -452,9 +452,7 @@ class SparseGPDecoder(BaseDecoder):
 
         return predictions
 
-    def predict_with_uncertainty(
-        self, X: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def predict_with_uncertainty(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Predict with uncertainty estimates."""
         if not self.is_fitted:
             raise RuntimeError("Decoder must be fitted before prediction.")
@@ -478,11 +476,13 @@ class SparseGPDecoder(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get decoder parameters."""
         params = super().get_params()
-        params.update({
-            "n_inducing": self.n_inducing,
-            "kernel": self.kernel_type,
-            "length_scale": self.length_scale,
-        })
+        params.update(
+            {
+                "n_inducing": self.n_inducing,
+                "kernel": self.kernel_type,
+                "length_scale": self.length_scale,
+            }
+        )
         return params
 
 
@@ -626,9 +626,11 @@ class GPClassifier(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get classifier parameters."""
         params = super().get_params()
-        params.update({
-            "kernel": self.kernel_type,
-            "length_scale": self.length_scale,
-            "n_classes": len(self.classes_) if self.classes_ is not None else None,
-        })
+        params.update(
+            {
+                "kernel": self.kernel_type,
+                "length_scale": self.length_scale,
+                "n_classes": len(self.classes_) if self.classes_ is not None else None,
+            }
+        )
         return params

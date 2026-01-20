@@ -147,9 +147,7 @@ class TestGaussianHMM:
         X, _ = state_sequence_data
 
         for cov_type in ["diag", "spherical", "full"]:
-            hmm = GaussianHMM(
-                n_states=2, covariance_type=cov_type, n_iter=10, random_state=42
-            )
+            hmm = GaussianHMM(n_states=2, covariance_type=cov_type, n_iter=10, random_state=42)
             hmm.fit(X)
             assert hmm.is_fitted
 

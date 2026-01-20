@@ -109,7 +109,7 @@ class RandomForestDecoder(BaseDecoder):
         self.feature_importances_ = self._model.feature_importances_
 
         # Store OOB score if available
-        if self.oob_score and hasattr(self._model, 'oob_score_'):
+        if self.oob_score and hasattr(self._model, "oob_score_"):
             self.oob_score_ = self._model.oob_score_
 
         self.is_fitted = True
@@ -140,9 +140,7 @@ class RandomForestDecoder(BaseDecoder):
 
         return y_pred
 
-    def get_feature_importance(
-        self, feature_names: Optional[list] = None
-    ) -> Dict[str, float]:
+    def get_feature_importance(self, feature_names: Optional[list] = None) -> Dict[str, float]:
         """
         Get feature importance ranking.
 
@@ -178,12 +176,14 @@ class RandomForestDecoder(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get decoder parameters."""
         params = super().get_params()
-        params.update({
-            "n_estimators": self.n_estimators,
-            "max_depth": self.max_depth,
-            "max_features": self.max_features,
-            "bootstrap": self.bootstrap,
-        })
+        params.update(
+            {
+                "n_estimators": self.n_estimators,
+                "max_depth": self.max_depth,
+                "max_features": self.max_features,
+                "bootstrap": self.bootstrap,
+            }
+        )
         if self.is_fitted:
             if self.oob_score_ is not None:
                 params["oob_score"] = self.oob_score_
@@ -287,7 +287,7 @@ class RandomForestClassifierDecoder(BaseDecoder):
 
         # Store feature importances and OOB score
         self.feature_importances_ = self._model.feature_importances_
-        if self.oob_score and hasattr(self._model, 'oob_score_'):
+        if self.oob_score and hasattr(self._model, "oob_score_"):
             self.oob_score_ = self._model.oob_score_
 
         self.is_fitted = True
@@ -363,9 +363,7 @@ class RandomForestClassifierDecoder(BaseDecoder):
 
         return metrics
 
-    def get_feature_importance(
-        self, feature_names: Optional[list] = None
-    ) -> Dict[str, float]:
+    def get_feature_importance(self, feature_names: Optional[list] = None) -> Dict[str, float]:
         """Get feature importance ranking."""
         if not self.is_fitted:
             raise RuntimeError("Classifier must be fitted first.")
@@ -378,12 +376,14 @@ class RandomForestClassifierDecoder(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get classifier parameters."""
         params = super().get_params()
-        params.update({
-            "n_estimators": self.n_estimators,
-            "max_depth": self.max_depth,
-            "max_features": self.max_features,
-            "n_classes": len(self.classes_) if self.classes_ is not None else None,
-        })
+        params.update(
+            {
+                "n_estimators": self.n_estimators,
+                "max_depth": self.max_depth,
+                "max_features": self.max_features,
+                "n_classes": len(self.classes_) if self.classes_ is not None else None,
+            }
+        )
         if self.oob_score_ is not None:
             params["oob_score"] = self.oob_score_
         return params

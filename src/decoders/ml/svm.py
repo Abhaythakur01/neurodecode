@@ -157,14 +157,16 @@ class SVMDecoder(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get decoder parameters."""
         params = super().get_params()
-        params.update({
-            "kernel": self.kernel,
-            "C": self.C,
-            "epsilon": self.epsilon,
-            "gamma": self.gamma,
-            "normalize": self.normalize,
-        })
-        if self.is_fitted and hasattr(self._model, 'n_support_'):
+        params.update(
+            {
+                "kernel": self.kernel,
+                "C": self.C,
+                "epsilon": self.epsilon,
+                "gamma": self.gamma,
+                "normalize": self.normalize,
+            }
+        )
+        if self.is_fitted and hasattr(self._model, "n_support_"):
             params["n_support_vectors"] = int(np.sum(self._model.n_support_))
         return params
 
@@ -302,8 +304,9 @@ class SVMClassifier(BaseDecoder):
             raise RuntimeError("Classifier must be fitted before prediction.")
 
         if not self.probability:
-            raise RuntimeError("Probability estimation not enabled. "
-                             "Set probability=True during initialization.")
+            raise RuntimeError(
+                "Probability estimation not enabled. " "Set probability=True during initialization."
+            )
 
         if X.ndim == 1:
             X = X.reshape(1, -1)
@@ -347,13 +350,15 @@ class SVMClassifier(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get classifier parameters."""
         params = super().get_params()
-        params.update({
-            "kernel": self.kernel,
-            "C": self.C,
-            "gamma": self.gamma,
-            "normalize": self.normalize,
-            "n_classes": len(self.classes_) if self.classes_ is not None else None,
-        })
+        params.update(
+            {
+                "kernel": self.kernel,
+                "C": self.C,
+                "gamma": self.gamma,
+                "normalize": self.normalize,
+                "n_classes": len(self.classes_) if self.classes_ is not None else None,
+            }
+        )
         if self.is_fitted:
             params["n_support_vectors"] = int(np.sum(self._model.n_support_))
         return params

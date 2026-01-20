@@ -90,7 +90,11 @@ def detect_spikes_multichannel(
         mad = np.median(np.abs(channel_data - median))
         sigma = mad / 0.6745  # Convert MAD to standard deviation estimate
 
-        threshold = median - threshold_std * sigma if direction == "negative" else median + threshold_std * sigma
+        threshold = (
+            median - threshold_std * sigma
+            if direction == "negative"
+            else median + threshold_std * sigma
+        )
 
         if direction == "both":
             threshold = threshold_std * sigma

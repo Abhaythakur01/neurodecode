@@ -14,10 +14,7 @@ except ImportError:
     TORCH_AVAILABLE = False
 
 if TORCH_AVAILABLE:
-    from src.decoders.deep_learning.lstm import (
-        BidirectionalLSTMDecoder,
-        LSTMDecoder,
-    )
+    from src.decoders.deep_learning.lstm import BidirectionalLSTMDecoder, LSTMDecoder
 
 
 @pytest.fixture
@@ -64,9 +61,7 @@ class TestLSTMNetwork:
     def test_forward(self, temporal_data):
         """Test forward pass."""
         X, y = temporal_data
-        decoder = LSTMDecoder(
-            hidden_size=64, sequence_length=10, n_epochs=1, verbose=False
-        )
+        decoder = LSTMDecoder(hidden_size=64, sequence_length=10, n_epochs=1, verbose=False)
         decoder.fit(X, y)
 
         batch_size = 8

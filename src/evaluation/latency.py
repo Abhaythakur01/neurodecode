@@ -151,8 +151,7 @@ class LatencyTracker:
         total = LatencyStats()
         for i in range(max_count):
             total_ms = sum(
-                c.measurements[i] if i < c.count else c.mean
-                for c in self.components.values()
+                c.measurements[i] if i < c.count else c.mean for c in self.components.values()
             )
             total.add(total_ms)
 

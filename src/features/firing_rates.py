@@ -141,7 +141,7 @@ def causal_smooth_firing_rate(
     original_shape = moved.shape
 
     if moved.ndim == 1:
-        smoothed = np.convolve(moved, kernel, mode="full")[:len(moved)]
+        smoothed = np.convolve(moved, kernel, mode="full")[: len(moved)]
     else:
         # Flatten all but first axis
         flat = moved.reshape(moved.shape[0], -1)

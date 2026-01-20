@@ -63,9 +63,9 @@ class GaussianHMM(BaseDecoder):
 
         # Model parameters (set during fit)
         self.startprob_: Optional[np.ndarray] = None  # Initial state probabilities
-        self.transmat_: Optional[np.ndarray] = None   # Transition matrix
-        self.means_: Optional[np.ndarray] = None      # Emission means
-        self.covars_: Optional[np.ndarray] = None     # Emission covariances
+        self.transmat_: Optional[np.ndarray] = None  # Transition matrix
+        self.means_: Optional[np.ndarray] = None  # Emission means
+        self.covars_: Optional[np.ndarray] = None  # Emission covariances
 
         self._log_likelihood_history: List[float] = []
 
@@ -102,8 +102,10 @@ class GaussianHMM(BaseDecoder):
             self._log_likelihood_history.append(log_likelihood)
 
             if self.verbose:
-                print(f"Iteration {iteration + 1}/{self.n_iter}: "
-                      f"Log-likelihood = {log_likelihood:.4f}")
+                print(
+                    f"Iteration {iteration + 1}/{self.n_iter}: "
+                    f"Log-likelihood = {log_likelihood:.4f}"
+                )
 
             # Check convergence
             if abs(log_likelihood - prev_log_likelihood) < self.tol:
@@ -205,7 +207,7 @@ class GaussianHMM(BaseDecoder):
 
         # Sample remaining
         for t in range(1, n_samples):
-            states[t] = np.random.choice(self.n_states, p=self.transmat_[states[t-1]])
+            states[t] = np.random.choice(self.n_states, p=self.transmat_[states[t - 1]])
             observations[t] = self._sample_emission(states[t])
 
         return observations, states
@@ -236,9 +238,7 @@ class GaussianHMM(BaseDecoder):
             "mse": 1.0 - accuracy,
         }
 
-    def _initialize_parameters(
-        self, X: np.ndarray, y: Optional[np.ndarray] = None
-    ) -> None:
+    def _initialize_parameters(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> None:
         """Initialize HMM parameters."""
         n_samples, n_features = X.shape
 
@@ -273,17 +273,18 @@ class GaussianHMM(BaseDecoder):
         # K-means iterations
         for _ in range(max_iter):
             # Assign points to nearest centroid
-            distances = np.array([
-                np.sum((X - self.means_[k]) ** 2, axis=1)
-                for k in range(self.n_states)
-            ]).T
+            distances = np.array(
+                [np.sum((X - self.means_[k]) ** 2, axis=1) for k in range(self.n_states)]
+            ).T
             labels = np.argmin(distances, axis=1)
 
             # Update centroids
-            new_means = np.array([
-                X[labels == k].mean(axis=0) if np.any(labels == k) else self.means_[k]
-                for k in range(self.n_states)
-            ])
+            new_means = np.array(
+                [
+                    X[labels == k].mean(axis=0) if np.any(labels == k) else self.means_[k]
+                    for k in range(self.n_states)
+                ]
+            )
 
             if np.allclose(self.means_, new_means):
                 break
@@ -372,9 +373,9 @@ class GaussianHMM(BaseDecoder):
         log_transmat = np.log(self.transmat_ + 1e-10)
         for t in range(1, n_samples):
             for j in range(self.n_states):
-                log_alpha[t, j] = logsumexp(
-                    log_alpha[t-1] + log_transmat[:, j]
-                ) + log_emission[t, j]
+                log_alpha[t, j] = (
+                    logsumexp(log_alpha[t - 1] + log_transmat[:, j]) + log_emission[t, j]
+                )
 
         return log_alpha
 
@@ -393,14 +394,12 @@ class GaussianHMM(BaseDecoder):
         for t in range(n_samples - 2, -1, -1):
             for i in range(self.n_states):
                 log_beta[t, i] = logsumexp(
-                    log_transmat[i, :] + log_emission[t+1] + log_beta[t+1]
+                    log_transmat[i, :] + log_emission[t + 1] + log_beta[t + 1]
                 )
 
         return log_beta
 
-    def _e_step(
-        self, X: np.ndarray
-    ) -> Tuple[float, np.ndarray, np.ndarray]:
+    def _e_step(self, X: np.ndarray) -> Tuple[float, np.ndarray, np.ndarray]:
         """E-step: compute posteriors and expected transitions."""
         n_samples = X.shape[0]
         log_emission = self._compute_log_emission(X)
@@ -424,10 +423,10 @@ class GaussianHMM(BaseDecoder):
             for i in range(self.n_states):
                 for j in range(self.n_states):
                     xi[t, i, j] = (
-                        log_alpha[t, i] +
-                        log_transmat[i, j] +
-                        log_emission[t+1, j] +
-                        log_beta[t+1, j]
+                        log_alpha[t, i]
+                        + log_transmat[i, j]
+                        + log_emission[t + 1, j]
+                        + log_beta[t + 1, j]
                     )
             xi[t] -= logsumexp(xi[t])
 
@@ -435,9 +434,7 @@ class GaussianHMM(BaseDecoder):
 
         return log_likelihood, posteriors, xi
 
-    def _m_step(
-        self, X: np.ndarray, posteriors: np.ndarray, xi: np.ndarray
-    ) -> None:
+    def _m_step(self, X: np.ndarray, posteriors: np.ndarray, xi: np.ndarray) -> None:
         """M-step: update parameters."""
         n_samples = X.shape[0]
 
@@ -456,9 +453,7 @@ class GaussianHMM(BaseDecoder):
         # Update emission covariances
         self._update_covars(X, posteriors, weights)
 
-    def _update_covars(
-        self, X: np.ndarray, posteriors: np.ndarray, weights: np.ndarray
-    ) -> None:
+    def _update_covars(self, X: np.ndarray, posteriors: np.ndarray, weights: np.ndarray) -> None:
         """Update covariance parameters."""
         n_features = X.shape[1]
 
@@ -466,24 +461,24 @@ class GaussianHMM(BaseDecoder):
             self.covars_ = np.zeros((self.n_states, n_features))
             for k in range(self.n_states):
                 diff = X - self.means_[k]
-                self.covars_[k] = (posteriors[:, k:k+1] * diff ** 2).sum(axis=0)
-                self.covars_[k] /= (weights[k] + 1e-10)
+                self.covars_[k] = (posteriors[:, k : k + 1] * diff**2).sum(axis=0)
+                self.covars_[k] /= weights[k] + 1e-10
                 self.covars_[k] += 1e-6  # Regularization
 
         elif self.covariance_type == "spherical":
             self.covars_ = np.zeros(self.n_states)
             for k in range(self.n_states):
                 diff = X - self.means_[k]
-                self.covars_[k] = (posteriors[:, k] * (diff ** 2).sum(axis=1)).sum()
-                self.covars_[k] /= (weights[k] * n_features + 1e-10)
+                self.covars_[k] = (posteriors[:, k] * (diff**2).sum(axis=1)).sum()
+                self.covars_[k] /= weights[k] * n_features + 1e-10
                 self.covars_[k] += 1e-6
 
         else:  # full
             self.covars_ = np.zeros((self.n_states, n_features, n_features))
             for k in range(self.n_states):
                 diff = X - self.means_[k]
-                self.covars_[k] = (posteriors[:, k:k+1] * diff).T @ diff
-                self.covars_[k] /= (weights[k] + 1e-10)
+                self.covars_[k] = (posteriors[:, k : k + 1] * diff).T @ diff
+                self.covars_[k] /= weights[k] + 1e-10
                 self.covars_[k] += 1e-6 * np.eye(n_features)
 
     def _viterbi(self, X: np.ndarray) -> np.ndarray:
@@ -502,7 +497,7 @@ class GaussianHMM(BaseDecoder):
         log_transmat = np.log(self.transmat_ + 1e-10)
         for t in range(1, n_samples):
             for j in range(self.n_states):
-                scores = viterbi[t-1] + log_transmat[:, j]
+                scores = viterbi[t - 1] + log_transmat[:, j]
                 backpointer[t, j] = np.argmax(scores)
                 viterbi[t, j] = scores[backpointer[t, j]] + log_emission[t, j]
 
@@ -525,9 +520,7 @@ class GaussianHMM(BaseDecoder):
 
         return np.random.multivariate_normal(self.means_[state], cov)
 
-    def _compute_accuracy_with_permutation(
-        self, y_true: np.ndarray, y_pred: np.ndarray
-    ) -> float:
+    def _compute_accuracy_with_permutation(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         """Compute accuracy handling label permutation."""
         from itertools import permutations
 
@@ -552,12 +545,14 @@ class GaussianHMM(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get model parameters."""
         params = super().get_params()
-        params.update({
-            "n_states": self.n_states,
-            "covariance_type": self.covariance_type,
-            "n_iter": self.n_iter,
-            "log_likelihood_history": self._log_likelihood_history[-10:],
-        })
+        params.update(
+            {
+                "n_states": self.n_states,
+                "covariance_type": self.covariance_type,
+                "n_iter": self.n_iter,
+                "log_likelihood_history": self._log_likelihood_history[-10:],
+            }
+        )
         if self.is_fitted:
             params["final_log_likelihood"] = self._log_likelihood_history[-1]
         return params
@@ -628,9 +623,7 @@ class DiscreteHMM(BaseDecoder):
         # Initialize
         self.startprob_ = np.ones(self.n_states) / self.n_states
         self.transmat_ = np.ones((self.n_states, self.n_states)) / self.n_states
-        self.emissionprob_ = np.random.dirichlet(
-            np.ones(self.n_symbols), size=self.n_states
-        )
+        self.emissionprob_ = np.random.dirichlet(np.ones(self.n_symbols), size=self.n_states)
 
         # EM iterations
         prev_ll = -np.inf
@@ -663,10 +656,11 @@ class DiscreteHMM(BaseDecoder):
                 for i in range(self.n_states):
                     for j in range(self.n_states):
                         xi[i, j] += np.exp(
-                            log_alpha[t, i] +
-                            np.log(self.transmat_[i, j] + 1e-10) +
-                            np.log(self.emissionprob_[j, X[t+1]] + 1e-10) +
-                            log_beta[t+1, j] - ll
+                            log_alpha[t, i]
+                            + np.log(self.transmat_[i, j] + 1e-10)
+                            + np.log(self.emissionprob_[j, X[t + 1]] + 1e-10)
+                            + log_beta[t + 1, j]
+                            - ll
                         )
 
             self.transmat_ = xi + 1e-10
@@ -697,17 +691,13 @@ class DiscreteHMM(BaseDecoder):
         n_samples = len(X)
         log_alpha = np.zeros((n_samples, self.n_states))
 
-        log_alpha[0] = (
-            np.log(self.startprob_ + 1e-10) +
-            np.log(self.emissionprob_[:, X[0]] + 1e-10)
-        )
+        log_alpha[0] = np.log(self.startprob_ + 1e-10) + np.log(self.emissionprob_[:, X[0]] + 1e-10)
 
         for t in range(1, n_samples):
             for j in range(self.n_states):
-                log_alpha[t, j] = (
-                    logsumexp(log_alpha[t-1] + np.log(self.transmat_[:, j] + 1e-10)) +
-                    np.log(self.emissionprob_[j, X[t]] + 1e-10)
-                )
+                log_alpha[t, j] = logsumexp(
+                    log_alpha[t - 1] + np.log(self.transmat_[:, j] + 1e-10)
+                ) + np.log(self.emissionprob_[j, X[t]] + 1e-10)
 
         return log_alpha
 
@@ -719,9 +709,9 @@ class DiscreteHMM(BaseDecoder):
         for t in range(n_samples - 2, -1, -1):
             for i in range(self.n_states):
                 log_beta[t, i] = logsumexp(
-                    np.log(self.transmat_[i, :] + 1e-10) +
-                    np.log(self.emissionprob_[:, X[t+1]] + 1e-10) +
-                    log_beta[t+1]
+                    np.log(self.transmat_[i, :] + 1e-10)
+                    + np.log(self.emissionprob_[:, X[t + 1]] + 1e-10)
+                    + log_beta[t + 1]
                 )
 
         return log_beta
@@ -732,18 +722,14 @@ class DiscreteHMM(BaseDecoder):
         viterbi = np.zeros((n_samples, self.n_states))
         backpointer = np.zeros((n_samples, self.n_states), dtype=int)
 
-        viterbi[0] = (
-            np.log(self.startprob_ + 1e-10) +
-            np.log(self.emissionprob_[:, X[0]] + 1e-10)
-        )
+        viterbi[0] = np.log(self.startprob_ + 1e-10) + np.log(self.emissionprob_[:, X[0]] + 1e-10)
 
         for t in range(1, n_samples):
             for j in range(self.n_states):
-                scores = viterbi[t-1] + np.log(self.transmat_[:, j] + 1e-10)
+                scores = viterbi[t - 1] + np.log(self.transmat_[:, j] + 1e-10)
                 backpointer[t, j] = np.argmax(scores)
-                viterbi[t, j] = (
-                    scores[backpointer[t, j]] +
-                    np.log(self.emissionprob_[j, X[t]] + 1e-10)
+                viterbi[t, j] = scores[backpointer[t, j]] + np.log(
+                    self.emissionprob_[j, X[t]] + 1e-10
                 )
 
         states = np.zeros(n_samples, dtype=int)
@@ -756,8 +742,10 @@ class DiscreteHMM(BaseDecoder):
     def get_params(self) -> Dict[str, Any]:
         """Get model parameters."""
         params = super().get_params()
-        params.update({
-            "n_states": self.n_states,
-            "n_symbols": self.n_symbols,
-        })
+        params.update(
+            {
+                "n_states": self.n_states,
+                "n_symbols": self.n_symbols,
+            }
+        )
         return params

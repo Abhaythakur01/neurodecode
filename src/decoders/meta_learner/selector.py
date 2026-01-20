@@ -83,14 +83,16 @@ class DecoderSelector:
         """
         # Filter to active/standby decoders
         available = {
-            name: wrapper for name, wrapper in decoders.items()
+            name: wrapper
+            for name, wrapper in decoders.items()
             if wrapper.state in (DecoderState.ACTIVE, DecoderState.STANDBY)
         }
 
         if not available:
             # Fallback: include degraded decoders if nothing else available
             available = {
-                name: wrapper for name, wrapper in decoders.items()
+                name: wrapper
+                for name, wrapper in decoders.items()
                 if wrapper.state != DecoderState.DISABLED
             }
 
@@ -173,13 +175,7 @@ class DecoderSelector:
             trend_bonus = max(-0.1, min(0.1, metrics.performance_trend))
 
             # Compute final score
-            score = (
-                r2_score
-                - uncertainty_penalty
-                - latency_penalty
-                + stability_bonus
-                + trend_bonus
-            )
+            score = r2_score - uncertainty_penalty - latency_penalty + stability_bonus + trend_bonus
 
             # State adjustment
             if wrapper.state == DecoderState.DEGRADED:
@@ -201,14 +197,11 @@ class DecoderSelector:
             return []
 
         sorted_decoders = sorted(scores.keys(), key=lambda x: scores[x], reverse=True)
-        return sorted_decoders[:min(self.top_k, len(sorted_decoders))]
+        return sorted_decoders[: min(self.top_k, len(sorted_decoders))]
 
     def _select_threshold(self, scores: Dict[str, float]) -> List[str]:
         """Select all decoders above threshold."""
-        selected = [
-            name for name, score in scores.items()
-            if score >= self.performance_threshold
-        ]
+        selected = [name for name, score in scores.items() if score >= self.performance_threshold]
 
         # Ensure at least one
         if not selected and scores:
@@ -275,11 +268,14 @@ class DecoderSelector:
                 return self._select_top_k(scores)
 
         # Check if high uncertainty situation
-        avg_uncertainty = np.mean([
-            decoders[name].metrics.recent_uncertainty
-            for name in scores.keys()
-            if decoders[name].metrics.recent_uncertainty < 1.0
-        ] or [0.5])
+        avg_uncertainty = np.mean(
+            [
+                decoders[name].metrics.recent_uncertainty
+                for name in scores.keys()
+                if decoders[name].metrics.recent_uncertainty < 1.0
+            ]
+            or [0.5]
+        )
 
         if avg_uncertainty > 0.5:
             # High uncertainty: use more decoders
@@ -309,8 +305,8 @@ class DecoderSelector:
 
             # Compare recent to historical performance
             all_r2 = metrics.r2_history
-            historical_avg = np.mean(all_r2[:-self.min_history])
-            recent_avg = np.mean(all_r2[-self.min_history:])
+            historical_avg = np.mean(all_r2[: -self.min_history])
+            recent_avg = np.mean(all_r2[-self.min_history :])
 
             if historical_avg - recent_avg > self.degradation_threshold:
                 degraded.append(name)
@@ -329,14 +325,11 @@ class DecoderSelector:
                 frequency[name] = frequency.get(name, 0) + 1
 
         total = len(self._selection_history)
-        selection_rates = {
-            name: count / total for name, count in frequency.items()
-        }
+        selection_rates = {name: count / total for name, count in frequency.items()}
 
         # Average scores
         avg_scores = {
-            name: np.mean(scores) if scores else 0
-            for name, scores in self._score_history.items()
+            name: np.mean(scores) if scores else 0 for name, scores in self._score_history.items()
         }
 
         return {

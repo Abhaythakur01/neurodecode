@@ -5,11 +5,7 @@ Unit tests for Gaussian Process decoder.
 import numpy as np
 import pytest
 
-from src.decoders.ml.gaussian_process import (
-    GaussianProcessDecoder,
-    GPClassifier,
-    SparseGPDecoder,
-)
+from src.decoders.ml.gaussian_process import GaussianProcessDecoder, GPClassifier, SparseGPDecoder
 
 
 @pytest.fixture
@@ -24,10 +20,12 @@ def regression_data():
     X = np.random.randn(n_samples, n_features)
 
     # Target is smooth function of features
-    y = np.column_stack([
-        np.sin(X[:, 0]) + 0.5 * X[:, 1] + 0.1 * np.random.randn(n_samples),
-        np.cos(X[:, 2]) - 0.3 * X[:, 3] + 0.1 * np.random.randn(n_samples),
-    ])
+    y = np.column_stack(
+        [
+            np.sin(X[:, 0]) + 0.5 * X[:, 1] + 0.1 * np.random.randn(n_samples),
+            np.cos(X[:, 2]) - 0.3 * X[:, 3] + 0.1 * np.random.randn(n_samples),
+        ]
+    )
 
     return X, y
 
@@ -74,9 +72,7 @@ class TestGaussianProcessDecoder:
     def test_fit(self, regression_data):
         """Test fitting the decoder."""
         X, y = regression_data
-        decoder = GaussianProcessDecoder(
-            kernel="rbf", n_restarts_optimizer=1, random_state=42
-        )
+        decoder = GaussianProcessDecoder(kernel="rbf", n_restarts_optimizer=1, random_state=42)
         decoder.fit(X, y)
 
         assert decoder.is_fitted
@@ -85,9 +81,7 @@ class TestGaussianProcessDecoder:
     def test_predict(self, regression_data):
         """Test prediction."""
         X, y = regression_data
-        decoder = GaussianProcessDecoder(
-            kernel="rbf", n_restarts_optimizer=1, random_state=42
-        )
+        decoder = GaussianProcessDecoder(kernel="rbf", n_restarts_optimizer=1, random_state=42)
         decoder.fit(X, y)
 
         y_pred = decoder.predict(X)
@@ -105,9 +99,7 @@ class TestGaussianProcessDecoder:
     def test_predict_with_uncertainty(self, regression_data):
         """Test prediction with uncertainty estimates."""
         X, y = regression_data
-        decoder = GaussianProcessDecoder(
-            kernel="rbf", n_restarts_optimizer=1, random_state=42
-        )
+        decoder = GaussianProcessDecoder(kernel="rbf", n_restarts_optimizer=1, random_state=42)
         decoder.fit(X, y)
 
         y_pred, y_std = decoder.predict_with_uncertainty(X)
@@ -119,9 +111,7 @@ class TestGaussianProcessDecoder:
     def test_get_uncertainty(self, regression_data):
         """Test getting uncertainty only."""
         X, y = regression_data
-        decoder = GaussianProcessDecoder(
-            kernel="rbf", n_restarts_optimizer=1, random_state=42
-        )
+        decoder = GaussianProcessDecoder(kernel="rbf", n_restarts_optimizer=1, random_state=42)
         decoder.fit(X, y)
 
         uncertainty = decoder.get_uncertainty(X)
@@ -132,9 +122,7 @@ class TestGaussianProcessDecoder:
     def test_sample_predictions(self, regression_data):
         """Test sampling from posterior."""
         X, y = regression_data
-        decoder = GaussianProcessDecoder(
-            kernel="rbf", n_restarts_optimizer=1, random_state=42
-        )
+        decoder = GaussianProcessDecoder(kernel="rbf", n_restarts_optimizer=1, random_state=42)
         decoder.fit(X, y)
 
         samples = decoder.sample_predictions(X[:10], n_samples=5)
@@ -146,9 +134,7 @@ class TestGaussianProcessDecoder:
         X, y = regression_data
 
         for kernel in ["rbf", "matern", "linear"]:
-            decoder = GaussianProcessDecoder(
-                kernel=kernel, n_restarts_optimizer=1, random_state=42
-            )
+            decoder = GaussianProcessDecoder(kernel=kernel, n_restarts_optimizer=1, random_state=42)
             decoder.fit(X, y)
             assert decoder.is_fitted
 
@@ -172,9 +158,7 @@ class TestGaussianProcessDecoder:
     def test_get_kernel_params(self, regression_data):
         """Test getting optimized kernel parameters."""
         X, y = regression_data
-        decoder = GaussianProcessDecoder(
-            kernel="rbf", n_restarts_optimizer=1, random_state=42
-        )
+        decoder = GaussianProcessDecoder(kernel="rbf", n_restarts_optimizer=1, random_state=42)
         decoder.fit(X, y)
 
         kernel_params = decoder.get_kernel_params()
@@ -186,9 +170,7 @@ class TestGaussianProcessDecoder:
     def test_get_params(self, regression_data):
         """Test get_params method."""
         X, y = regression_data
-        decoder = GaussianProcessDecoder(
-            kernel="matern", length_scale=1.5, n_restarts_optimizer=1
-        )
+        decoder = GaussianProcessDecoder(kernel="matern", length_scale=1.5, n_restarts_optimizer=1)
         decoder.fit(X, y)
 
         params = decoder.get_params()
