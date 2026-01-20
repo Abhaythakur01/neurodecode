@@ -2,9 +2,21 @@
 Evaluation module for neural decoder performance.
 
 Provides metrics (R², MSE, correlation), latency measurement,
-and cross-validation utilities.
+cross-validation utilities, and BCI-specific metrics (ITR, throughput).
 """
 
+from src.evaluation.bci_metrics import (
+    BCIPerformanceMetrics,
+    bits_per_second_continuous,
+    compute_bci_metrics,
+    effective_throughput,
+    fitts_throughput,
+    information_transfer_rate,
+    movement_variability,
+    path_efficiency,
+    success_rate,
+    target_acquisition_metrics,
+)
 from src.evaluation.cross_validation import (
     blocked_split,
     compare_decoders,
@@ -30,7 +42,7 @@ from src.evaluation.metrics import (
 )
 
 __all__ = [
-    # Metrics
+    # Standard Metrics
     "r2_score",
     "mse",
     "rmse",
@@ -39,6 +51,17 @@ __all__ = [
     "snr",
     "compute_all_metrics",
     "compute_metrics_per_dimension",
+    # BCI Metrics
+    "information_transfer_rate",
+    "fitts_throughput",
+    "effective_throughput",
+    "path_efficiency",
+    "movement_variability",
+    "target_acquisition_metrics",
+    "success_rate",
+    "bits_per_second_continuous",
+    "compute_bci_metrics",
+    "BCIPerformanceMetrics",
     # Latency
     "LatencyStats",
     "LatencyTracker",
