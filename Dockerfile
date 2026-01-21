@@ -74,12 +74,16 @@ RUN pip install --user --no-deps .
 # Set PATH for user-installed packages
 ENV PATH="/home/neurodecode/.local/bin:${PATH}"
 
+# Default port (Render overrides with $PORT)
+ENV PORT=8000
+
 # Expose port
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Health check (disabled for Render compatibility - use platform health checks)
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+#     CMD curl -f http://localhost:${PORT}/health || exit 1
 
-# Run production server
-CMD ["uvicorn", "src.backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+# Run production server (single worker for free tier memory limits)
+# Using shell form to expand $PORT environment variable
+CMD uvicorn src.backend.main:app --host 0.0.0.0 --port ${PORT}
