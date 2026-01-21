@@ -1,21 +1,16 @@
-# Render Blueprint for NeuroDecode deployment
+# Render Blueprint for NeuroDecode Demo deployment
 # Deploy: Connect repo to Render and it will auto-detect this file
 
 services:
-  # Backend API Service
+  # Backend API Service (Lightweight Demo)
   - type: web
     name: neurodecode-api
     runtime: docker
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./Dockerfile.demo
     dockerContext: .
-    dockerCommand: uvicorn src.backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: ENVIRONMENT
         value: production
-      - key: DEBUG
-        value: "false"
-      - key: SKIP_AUTO_CALIBRATION
-        value: "true"
       - key: PORT
         fromService:
           type: web
@@ -26,8 +21,6 @@ services:
     region: oregon
     buildFilter:
       paths:
-        - src/**
-        - requirements.txt
-        - Dockerfile
-        - setup.py
-        - pyproject.toml
+        - src/backend/main_demo.py
+        - requirements-demo.txt
+        - Dockerfile.demo

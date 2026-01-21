@@ -1,0 +1,38 @@
+# Lightweight Dockerfile for NeuroDecode Demo Backend
+# Used for portfolio deployment on free-tier platforms (Render, etc.)
+
+FROM python:3.10-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+WORKDIR /app
+
+# Install only demo dependencies (minimal)
+COPY requirements-demo.txt ./
+RUN pip install --upgrade pip && \
+    pip install -r requirements-demo.txt
+
+# Copy only the demo backend
+COPY src/backend/main_demo.py ./src/backend/
+
+# Create __init__.py files for package structure
+RUN mkdir -p src/backend && \
+    touch src/__init__.py && \
+    touch src/backend/__init__.py
+
+# Default port (Render overrides with $PORT)
+ENV PORT=8000
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${PORT}/health')" || exit 1
+
+# Run the demo server
+CMD uvicorn src.backend.main_demo:app --host 0.0.0.0 --port ${PORT}

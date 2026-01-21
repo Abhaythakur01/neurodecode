@@ -1,0 +1,8 @@
+# Minimal dependencies for demo backend
+# Used for lightweight portfolio deployment
+
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+websockets>=11.0
