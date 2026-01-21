@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
 
     # Server
-    host: str = "0.0.0.0"
+    host: str = "0.0.0.0"  # nosec B104 - required for Docker/container deployment
     port: int = 8000
 
     # Database (optional, for future use)
@@ -37,7 +37,12 @@ class Settings(BaseSettings):
 
     # CORS
     cors_origins: List[str] = Field(
-        default=["http://localhost:3000", "http://localhost:5173"],
+        default=[
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "https://neurodecode.vercel.app",
+            "https://neurodecode-frontend.vercel.app",
+        ],
         description="Allowed CORS origins",
     )
 

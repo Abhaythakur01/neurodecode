@@ -12,7 +12,23 @@ import type {
   WebSocketMessage,
 } from '../types';
 
-const WS_URL = `ws://${window.location.hostname}:8000/ws/decode`;
+// Determine WebSocket URL based on environment
+const getWebSocketUrl = (): string => {
+  // Use environment variable if set (for production)
+  if (import.meta.env.VITE_WS_URL) {
+    return import.meta.env.VITE_WS_URL;
+  }
+
+  // In production (HTTPS), use secure WebSocket through the same origin
+  if (window.location.protocol === 'https:') {
+    return `wss://${window.location.host}/ws/decode`;
+  }
+
+  // Development: connect to local backend
+  return `ws://${window.location.hostname}:8000/ws/decode`;
+};
+
+const WS_URL = getWebSocketUrl();
 const RECONNECT_DELAY = 2000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 

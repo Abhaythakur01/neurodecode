@@ -1,0 +1,33 @@
+# Render Blueprint for NeuroDecode deployment
+# Deploy: Connect repo to Render and it will auto-detect this file
+
+services:
+  # Backend API Service
+  - type: web
+    name: neurodecode-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: uvicorn src.backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: CORS_ORIGINS
+        value: https://neurodecode.vercel.app,https://neurodecode-frontend.vercel.app
+      - key: PORT
+        fromService:
+          type: web
+          name: neurodecode-api
+          property: port
+    healthCheckPath: /health
+    plan: free
+    region: oregon
+    buildFilter:
+      paths:
+        - src/**
+        - requirements.txt
+        - Dockerfile
+        - setup.py
+        - pyproject.toml

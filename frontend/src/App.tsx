@@ -23,6 +23,7 @@ import { useSessionRecording } from './hooks/useSessionRecording';
 import { useSessionPlayback } from './hooks/useSessionPlayback';
 import { useAnalytics } from './hooks/useAnalytics';
 import { useSettingsStore } from './stores/settingsStore';
+import { apiUrl } from './config';
 import { useLayoutStore } from './stores/layoutStore';
 import { useSessionStore } from './stores/sessionStore';
 import type {
@@ -216,7 +217,7 @@ function App() {
   // Handle calibration
   const handleCalibrate = useCallback(async () => {
     try {
-      const response = await fetch('/api/simulation/calibrate', {
+      const response = await fetch(apiUrl('/api/simulation/calibrate'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ n_samples: 500 }),
