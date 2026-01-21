@@ -5,9 +5,9 @@ Environment variables can override defaults via .env file or system env.
 """
 
 from functools import lru_cache
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -45,6 +45,15 @@ class Settings(BaseSettings):
         ],
         description="Allowed CORS origins",
     )
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        """Parse CORS origins from comma-separated string or list."""
+        if isinstance(v, str):
+            # Handle comma-separated string from environment variable
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v
 
     # BCI/Decoder Settings
     max_latency_ms: float = Field(
