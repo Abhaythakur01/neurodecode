@@ -1,0 +1,90 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info
+dist
+build
+venv
+env
+.venv
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Documentation
+docs/_build
+*.md
+LICENSE
+
+# Tests
+tests
+.pytest_cache
+.coverage
+htmlcov
+.hypothesis
+
+# Data (too large for image)
+data/raw/*
+data/processed/*
+data/datasets/*
+*.h5
+*.hdf5
+*.npy
+*.npz
+
+# Models (too large for image)
+models/trained/*
+models/checkpoints/*
+*.pt
+*.pth
+*.ckpt
+
+# Logs
+logs
+*.log
+wandb
+
+# Frontend (deployed separately on Vercel)
+frontend
+
+# Node
+node_modules
+npm-debug.log
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# CI/CD
+.github
+
+# Notebooks
+notebooks
+*.ipynb
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+tmp
+temp
+sandbox
+experiments
