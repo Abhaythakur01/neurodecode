@@ -14,6 +14,8 @@ services:
         value: production
       - key: DEBUG
         value: "false"
+      - key: SKIP_AUTO_CALIBRATION
+        value: "true"
       - key: PORT
         fromService:
           type: web

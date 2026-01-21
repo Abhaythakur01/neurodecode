@@ -35,16 +35,19 @@ async def lifespan(app: FastAPI):
     logger.info(f"Max latency target: {settings.max_latency_ms}ms")
 
     # Pre-calibrate with synthetic data for immediate availability
-    try:
-        logger.info("Generating calibration data...")
-        X_cal, y_cal = simulation_runner.generate_calibration_data(settings.calibration_samples)
-        logger.info(f"Calibration data generated: X={X_cal.shape}, y={y_cal.shape}")
+    if settings.skip_auto_calibration:
+        logger.info("Skipping auto-calibration (SKIP_AUTO_CALIBRATION=true)")
+    else:
+        try:
+            logger.info("Generating calibration data...")
+            X_cal, y_cal = simulation_runner.generate_calibration_data(settings.calibration_samples)
+            logger.info(f"Calibration data generated: X={X_cal.shape}, y={y_cal.shape}")
 
-        logger.info("Initializing meta-learner...")
-        scores = decoder_service.initialize(X_cal, y_cal)
-        logger.info(f"Meta-learner initialized. Decoder scores: {scores}")
-    except Exception as e:
-        logger.warning(f"Auto-calibration failed: {e}. Manual calibration required.")
+            logger.info("Initializing meta-learner...")
+            scores = decoder_service.initialize(X_cal, y_cal)
+            logger.info(f"Meta-learner initialized. Decoder scores: {scores}")
+        except Exception as e:
+            logger.warning(f"Auto-calibration failed: {e}. Manual calibration required.")
 
     logger.info(f"{settings.app_name} started successfully")
 

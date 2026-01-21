@@ -110,6 +110,10 @@ class Settings(BaseSettings):
         default=500,
         description="Number of samples for initial calibration",
     )
+    skip_auto_calibration: bool = Field(
+        default=False,
+        description="Skip auto-calibration on startup (for low-memory environments)",
+    )
 
     model_config = {
         "env_file": ".env",
