@@ -88,6 +88,7 @@ dmypy.json
 *.c
 *.cpp
 *.html
+!frontend/index.html
 
 # Data Files
 data/raw/*
