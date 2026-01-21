@@ -4,11 +4,20 @@ Backend configuration using Pydantic settings.
 Environment variables can override defaults via .env file or system env.
 """
 
+import json
 from functools import lru_cache
-from typing import List, Optional, Union
+from typing import List, Optional
 
-from pydantic import Field, field_validator
+from pydantic import Field, computed_field
 from pydantic_settings import BaseSettings
+
+# Default CORS origins
+DEFAULT_CORS_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://neurodecode.vercel.app",
+    "https://neurodecode-frontend.vercel.app",
+]
 
 
 class Settings(BaseSettings):
@@ -35,25 +44,32 @@ class Settings(BaseSettings):
         description="Redis connection string for caching",
     )
 
-    # CORS
-    cors_origins: List[str] = Field(
-        default=[
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "https://neurodecode.vercel.app",
-            "https://neurodecode-frontend.vercel.app",
-        ],
-        description="Allowed CORS origins",
+    # CORS - stored as string to avoid pydantic-settings JSON parsing issues
+    cors_origins_str: str = Field(
+        default="",
+        description="Allowed CORS origins (comma-separated or JSON array)",
+        alias="CORS_ORIGINS",
     )
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
-        """Parse CORS origins from comma-separated string or list."""
-        if isinstance(v, str):
-            # Handle comma-separated string from environment variable
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v
+    @computed_field
+    @property
+    def cors_origins(self) -> List[str]:
+        """Get CORS origins as a list, parsing from string if needed."""
+        if not self.cors_origins_str:
+            return DEFAULT_CORS_ORIGINS
+
+        value = self.cors_origins_str.strip()
+
+        # Try JSON array first
+        if value.startswith("["):
+            try:
+                return json.loads(value)
+            except json.JSONDecodeError:
+                pass
+
+        # Fall back to comma-separated
+        origins = [o.strip() for o in value.split(",") if o.strip()]
+        return origins if origins else DEFAULT_CORS_ORIGINS
 
     # BCI/Decoder Settings
     max_latency_ms: float = Field(

@@ -14,8 +14,6 @@ services:
         value: production
       - key: DEBUG
         value: "false"
-      - key: CORS_ORIGINS
-        value: https://neurodecode.vercel.app,https://neurodecode-frontend.vercel.app
       - key: PORT
         fromService:
           type: web
