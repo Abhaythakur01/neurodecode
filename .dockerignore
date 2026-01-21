@@ -26,6 +26,7 @@ env
 # Documentation
 docs/_build
 *.md
+!README.md
 LICENSE
 
 # Tests
