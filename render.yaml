@@ -11,11 +11,6 @@ services:
     envVars:
       - key: ENVIRONMENT
         value: production
-      - key: PORT
-        fromService:
-          type: web
-          name: neurodecode-api
-          property: port
     healthCheckPath: /health
     plan: free
     region: oregon
